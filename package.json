@@ -1,0 +1,38 @@
+{
+    "name": "@iobroker/plugin-sentry",
+    "version": "0.0.1",
+    "description": "Sentry module for plugins for js-controller and adapters",
+    "author": {
+        "name": "Ingo Fischer",
+        "email": "iobroker@fischer-ka.de"
+    },
+    "main": "index.js",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ioBroker/plugin-sentry.git"
+    },
+    "keywords": [
+        "iobroker",
+        "adapter",
+        "plugins",
+        "Sentry"
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ioBroker/plugin-sentry/issues"
+    },
+    "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
+    "dependencies": {
+        "@iobroker/plugin-base": "ioBroker/plugin-base",
+        "@sentry/node": "^5.15.0",
+        "@sentry/integrations": "^5.15.0",
+        "source-map-support": "^0.5.16"
+    },
+    "devDependencies": {
+        "@types/node": "^13.9.3",
+        "eslint": "^6.8.0",
+        "eslint-config-prettier": "^6.10.1",
+        "eslint-plugin-prettier": "^3.1.2"
+    }
+}
