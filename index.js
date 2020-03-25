@@ -58,7 +58,8 @@ class SentryPlugin extends PluginBase {
             else {
                 scope.setTag('installedFrom', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
             }
-            scope.addEventProcessor(function(event, hint) {
+            scope.addEventProcessor((event, hint) => {
+                if (!this.isActive) return;
                 // Try to filter out some events
                 if (event && event.metadata) {
                     if (event.metadata.function && event.metadata.function.startsWith('Module.')) {
@@ -106,6 +107,15 @@ class SentryPlugin extends PluginBase {
                 }
             });
         });
+    }
+
+    /**
+     * Destroy plugin instance
+     *
+     * @return {boolean} true/false depending on if exit was successful/is supported
+     */
+    destroy() {
+        return true;
     }
 
     /**
