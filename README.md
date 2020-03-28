@@ -31,5 +31,5 @@ Additional states are not created.
 
 ## Changelog
 
-### 0.1.0 (2020-03-2x)
+### 0.1.0 (2020-03-29)
 * (Apollon77) initial release
