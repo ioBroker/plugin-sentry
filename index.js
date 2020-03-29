@@ -68,15 +68,15 @@ class SentryPlugin extends PluginBase {
                         return null;
                     }
                     if (event.exception && event.exception.values && event.exception.values[0] && event.exception.values[0].stacktrace && event.exception.values[0].stacktrace.frames) {
+                        let foundWhitelisted = false;
                         for (let i = 0; i < (event.exception.values[0].stacktrace.frames.length > 5 ? 5 : event.exception.values[0].stacktrace.frames.length); i++) {
-                            let foundWhitelisted = false;
                             if (event.exception.values[0].stacktrace.frames[i].filename && sentryPathWhitelist.find(path => path && path.length && event.exception.values[0].stacktrace.frames[i].filename.includes(path))) {
                                 foundWhitelisted = true;
                                 break;
                             }
-                            if (!foundWhitelisted) {
-                                return null;
-                            }
+                        }
+                        if (!foundWhitelisted) {
+                            return null;
                         }
                     }
                 }
