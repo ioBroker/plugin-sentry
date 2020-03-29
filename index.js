@@ -2,15 +2,11 @@ const {PluginBase} = require('@iobroker/plugin-base');
 
 class SentryPlugin extends PluginBase {
 
-    constructor(settings) {
-        super(settings);
-    }
-
     /**
      * Register and initialize Sentry
      *
-     * @param pluginConfig {object} plugin configuration from config files
-     * @param callback {function} callback when done, signature "(err, initSuccessful)". On err or initSuccessful===false the plugin instance will be discarded
+     * @param {Record<string, any>} pluginConfig plugin configuration from config files
+     * @param {import('@iobroker/plugin-base').InitCallback} callback Will be called when done
      */
     init(pluginConfig, callback) {
         if (!pluginConfig.enabled) {
@@ -23,7 +19,7 @@ class SentryPlugin extends PluginBase {
         }
         // Require needed tooling
         this.Sentry = require('@sentry/node');
-        this.SentryIntegrations = require('@sentry/integrations');
+        const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
         // locations in error messages
         require('source-map-support').install();
@@ -47,7 +43,7 @@ class SentryPlugin extends PluginBase {
             release: this.parentPackage.name + '@' + this.parentPackage.version,
             dsn: pluginConfig.dsn,
             integrations: [
-                new this.SentryIntegrations.Dedupe()
+                new SentryIntegrations.Dedupe()
             ]
         });
         this.Sentry.configureScope(scope => {
@@ -107,15 +103,6 @@ class SentryPlugin extends PluginBase {
                 }
             });
         });
-    }
-
-    /**
-     * Destroy plugin instance
-     *
-     * @return {boolean} true/false depending on if exit was successful/is supported
-     */
-    destroy() {
-        return true;
     }
 
     /**
