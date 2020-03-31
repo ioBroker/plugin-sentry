@@ -31,6 +31,9 @@ Additional states are not created.
 
 ## Changelog
 
+### 0.1.2 (2020-03-31)
+* (Apollon77) fix filtering logic
+
 ### 0.1.1 (2020-03-29)
 * (AlCalzone) add type support and optimizations
 
