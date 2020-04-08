@@ -23,6 +23,11 @@ The configuration contains the following settings:
 
 The configuration can be contained in io-package.json in common area or for js-controller in iobroker.data/iobroker.json on main level.
 
+### How can I get my Sentry account?
+One option is to use the free sentry service from [Sentry.io](https://sentry.io/). Here you can sign up and get an account up to 5.000 events per month for free. Here you have full control, but the Service ist hosted in the USA!
+
+A second option is to contact @Apollon77 to discuss to get an account on the ioBroker own Sentry Server instance, but this might be limited by the available server resources, so we will not promise this!
+
 ## Plugin States
 
 This plugin respects the "enabled" state created as system.adapter.name.X.plugins.sentry.enabled and will **not** initialize the error reporting if set to false.
