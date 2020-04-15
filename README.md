@@ -16,7 +16,17 @@ All of this helps us developers to provide an error free smart home system that 
 If you want to disable the error reporting you can do this by setting the state "system.host.NAME.plugins.sentry.enabled" (for js-controller hosts) or "system.adapter.NAME.INSTANCE.plugins.sentry.enabled" (for adapter instances) to false. You should see a log message stating that sentry was disabled. After disabling the plugin no crashes from your system are reported and so can not be fixed without reporting them by yourself manually!
 
 ## Plugin Configuration
-The configuration is like:
+The minimal configuration which needs to be added to the common section of io-package.json is like:
+
+```
+"plugins": {
+    "sentry": {
+        "dsn": "https://...@.../..."
+    }
+}
+```
+
+If needed there are two more optional configuration options that can be also be provided:
 
 ```
 "plugins": {
@@ -27,6 +37,7 @@ The configuration is like:
     }
 }
 ```
+
 
 The configuration contains the following settings:
 * **dsn**: Required. This is the Sentry DSN as displayed after creation of the sentry project
@@ -47,6 +58,10 @@ The basic process to use the ioBroker Sentry system will be:
 * We will create the project on sentry and assign it to you
 * We will provide the needed Sentry dsn for your configuration
 * You add the configuration to io-package.json and a short info section to your README
+Readme add to top please:
+```
+**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
+```
 * If you want to transfer own errors or other events we also talk about that in detail then
 * Then you can test and release it. 
 
@@ -94,6 +109,21 @@ if (adapter.supportsFeature && adapter.supportsFeature('PLUGINS')) {
     }
 }
 ```
+
+## How to test Sentry integration
+The easiest way is to add an invalid call to your code, e.g.
+
+```
+huhu();
+```
+
+or 
+
+```
+setTimeout(huhu, 10000);
+```
+
+The adapter should crash in this place and the exception should be shown in the sentry UI some seconds/minutes later
 
 ## Changelog
 
