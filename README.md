@@ -41,7 +41,7 @@ One option is to use the free sentry service from [Sentry.io](https://sentry.io/
 A second option is to contact @Apollon77 to discuss to get an account on the ioBroker own Sentry Server instance, but this might be limited by the available server resources, so we will not promise this!
 
 The basic process to use the ioBroker Sentry system will be:
-* You contact @Apollon77
+* You contact @Apollon77 by creating an issue hier in this project for each adapter you want access
 * We will do a enhanced Adapter review especially looking for error handling (because we do not want adapters flooding the sentry system)
 * We will need an email to invite you to the Sentry instance and you need s Two-Factor-Auth App (e.g. Google Authenticator) to secure that account
 * We will create the project on sentry and assign it to you
