@@ -31,6 +31,10 @@ class SentryPlugin extends PluginBase {
         if (this.parentPackage.name && !sentryPathWhitelist.includes(this.parentPackage.name)) {
             sentryPathWhitelist.push(this.parentPackage.name);
         }
+        let sentryPathBlacklist = [];
+        if (pluginConfig.pathBlacklist && Array.isArray(pluginConfig.pathBlacklist)) {
+            sentryPathBlacklist = pluginConfig.pathBlacklist;
+        }
         let sentryErrorBlacklist = [];
         if (pluginConfig.errorBlacklist && Array.isArray(pluginConfig.errorBlacklist)) {
             sentryErrorBlacklist = pluginConfig.errorBlacklist;
@@ -47,12 +51,13 @@ class SentryPlugin extends PluginBase {
             ]
         });
         this.Sentry.configureScope(scope => {
-            scope.setTag('version', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
-            if (this.parentIoPackage.common.installedFrom) {
-                scope.setTag('installedFrom', this.parentIoPackage.common.installedFrom);
-            }
-            else {
-                scope.setTag('installedFrom', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
+            if (this.parentIoPackage && this.parentIoPackage.common) {
+                scope.setTag('version', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
+                if (this.parentIoPackage.common.installedFrom) {
+                    scope.setTag('installedFrom', this.parentIoPackage.common.installedFrom);
+                } else {
+                    scope.setTag('installedFrom', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
+                }
             }
             scope.addEventProcessor((event, _hint) => {
                 if (!this.isActive) return;
@@ -77,6 +82,9 @@ class SentryPlugin extends PluginBase {
                                 return false;
                             }
                             if (frame.filename && !sentryPathWhitelist.find(path => path && path.length && frame.filename.includes(path))) {
+                                return false;
+                            }
+                            if (frame.filename && sentryPathBlacklist.find(path => path && path.length && frame.filename.includes(path))) {
                                 return false;
                             }
                             return true;

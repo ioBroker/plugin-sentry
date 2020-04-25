@@ -33,6 +33,7 @@ If needed there are two more optional configuration options that can be also be 
     "sentry": {
         "dsn": "https://...@.../...",
         "pathWhitelist": ["@iobroker", "iobroker.js-controller"],
+        "pathBlacklist": ["scripts.js"],
         "errorBlacklist": ["SyntaxError"]
     }
 }
@@ -42,6 +43,7 @@ If needed there are two more optional configuration options that can be also be 
 The configuration contains the following settings:
 * **dsn**: Required. This is the Sentry DSN as displayed after creation of the sentry project
 * **pathWhitelist**: Optional array with strings that needs to be part of the path to be included for reporting. Exceptions that do not contain one of these strings in the reported filenames will not be sent! The current name of the adapter the plugin is used in is automatically added.
+* **pathBlacklist**: Optional array with strings that are checked against all exception lines and as soon as one line contains this string the exception is not send.
 * **errorBlacklist**: Optional array with error types that will not be reported. "SyntaxError" is added automatically because these should be found on development time and not with real customers. 
 
 The configuration can be contained in io-package.json in common area or for js-controller in iobroker.data/iobroker.json on main level.
@@ -126,6 +128,9 @@ setTimeout(huhu, 10000);
 The adapter should crash in this place and the exception should be shown in the sentry UI some seconds/minutes later
 
 ## Changelog
+
+### 0.2.0 (2020-04-26)
+* (Apollon77) add pathBlacklist config option
 
 ### 0.1.2 (2020-03-31)
 * (Apollon77) fix filtering logic
