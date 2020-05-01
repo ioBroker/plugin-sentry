@@ -129,6 +129,9 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
+### 1.0.1 (2020-05-01)
+* (Apollon77) update plugin-base
+
 ### 1.0.0 (2020-04-26)
 * (Apollon77) add pathBlacklist config option
 * (Apollon77) declare as 1.0.0 for js-controller 3.0 release
