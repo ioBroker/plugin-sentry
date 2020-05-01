@@ -129,7 +129,7 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
-### 1.0.1 (2020-05-01)
+### 1.0.2 (2020-05-01)
 * (Apollon77) update plugin-base
 
 ### 1.0.0 (2020-04-26)
