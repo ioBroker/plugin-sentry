@@ -1,6 +1,6 @@
 {
     "name": "@iobroker/plugin-sentry",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "description": "Sentry module for plugins for js-controller and adapters",
     "author": {
         "name": "Ingo Fischer",
@@ -30,8 +30,8 @@
         "source-map-support": "^0.5.19"
     },
     "devDependencies": {
-        "@types/node": "^13.13.4",
-        "eslint": "^6.8.0",
+        "@types/node": "^13.13.5",
+        "eslint": "^7.0.0",
         "eslint-config-prettier": "^6.11.0",
         "eslint-plugin-prettier": "^3.1.3"
     }

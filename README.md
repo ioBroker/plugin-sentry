@@ -129,6 +129,10 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
+### 1.1.0 (2020-05-09)
+* (Apollon77) add nodejs version and platform and js-controller version to Sentry data
+* (Apollon77) check additional states if Sentry reporting is active or not
+
 ### 1.0.2 (2020-05-01)
 * (Apollon77) update plugin-base
 

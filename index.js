@@ -8,15 +8,65 @@ class SentryPlugin extends PluginBase {
      * @param {Record<string, any>} pluginConfig plugin configuration from config files
      * @param {import('@iobroker/plugin-base').InitCallback} callback Will be called when done
      */
-    init(pluginConfig, callback) {
+    async init(pluginConfig, callback) {
         if (!pluginConfig.enabled) {
             this.log.info('Sentry Plugin disabled by user');
-            return void callback(null, false);
+            return callback && callback(null, false);
         }
 
         if (!pluginConfig.dsn) {
-            return void callback('Invalid Sentry definition, no dsn provided. Disable error reporting', false);
+            return callback && callback('Invalid Sentry definition, no dsn provided. Disable error reporting', false);
         }
+
+        // turn off on Travis, Appveyor or GitHub actions or other Systems that set "CI=true"
+        if (
+            (process.env.TRAVIS && process.env.TRAVIS==='true') ||
+            (process.env.APPVEYOR && process.env.APPVEYOR==='True') ||
+            (process.env.CI && process.env.CI==='true')
+        ) {
+            return callback && callback(null, true);
+        }
+
+        // turn off is parent Package contains disableDataReporting flag
+        if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+            return callback && callback(null, true);
+        }
+
+        // for Adapter also check host disableDataReporting flag
+        if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.host) {
+            let hostObj;
+            try {
+                hostObj = await this.getObjectAsync(`system.host.${this.parentIoPackage.common.host}`);
+            } catch {
+                // ignore
+            }
+            if (hostObj && typeof hostObj.common && hostObj.common.disableDataReporting) {
+                return callback && callback(null, true);
+            }
+        }
+
+        let systemConfig;
+        try {
+            systemConfig = await this.getObjectAsync('system.config');
+        } catch {
+            // ignore
+        }
+        if (!systemConfig || !systemConfig.common || !systemConfig.common.diag === 'none') {
+            return callback && callback(null, true);
+        }
+
+        let uuidObj;
+        try {
+            uuidObj = await this.getObjectAsync('system.meta.uuid');
+        } catch {
+            // ignore
+        }
+        let uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
+
+        this._registerSentry(pluginConfig, uuid, callback);
+    }
+
+    _registerSentry(pluginConfig, uuid, callback) {
         // Require needed tooling
         this.Sentry = require('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
@@ -58,7 +108,19 @@ class SentryPlugin extends PluginBase {
                 } else {
                     scope.setTag('installedFrom', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
                 }
+                if (this.settings && this.settings.controllerVersion) {
+                    scope.setTag('jsControllerVersion', this.settings.controllerVersion);
+                }
+                scope.setTag('nodejsPlatform', process.platform);
+                scope.setTag('nodejsVersion', process.version);
             }
+
+            if (uuid) {
+                scope.setUser({
+                    id: uuid
+                });
+            }
+
             scope.addEventProcessor((event, _hint) => {
                 if (!this.isActive) return;
                 // Try to filter out some events
@@ -98,24 +160,7 @@ class SentryPlugin extends PluginBase {
                 return event;
             });
 
-            this.getObject('system.config', (err, obj) => {
-                if (obj && obj.common && obj.common.diag) {
-                    this.getObject('system.meta.uuid', (err, obj) => {
-                        // create uuid
-                        if (!err  && obj) {
-                            this.Sentry.configureScope(scope => {
-                                scope.setUser({
-                                    id: obj.native.uuid
-                                });
-                            });
-                        }
-                        callback && callback(null, true);
-                    });
-                }
-                else {
-                    callback && callback(null, true);
-                }
-            });
+            callback && callback(null, true);
         });
     }
 
