@@ -51,7 +51,7 @@ class SentryPlugin extends PluginBase {
         } catch {
             // ignore
         }
-        if (!systemConfig || !systemConfig.common || !systemConfig.common.diag === 'none') {
+        if (!systemConfig || !systemConfig.common || systemConfig.common.diag === 'none') {
             return callback && callback(null, true);
         }
 
