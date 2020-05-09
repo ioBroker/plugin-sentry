@@ -15,15 +15,11 @@ class SentryPlugin extends PluginBase {
         }
 
         if (!pluginConfig.dsn) {
-            return callback && callback('Invalid Sentry definition, no dsn provided. Disable error reporting', false);
+            return callback && callback(new Error('Invalid Sentry definition, no dsn provided. Disable error reporting'), false);
         }
 
         // turn off on Travis, Appveyor or GitHub actions or other Systems that set "CI=true"
-        if (
-            (process.env.TRAVIS && process.env.TRAVIS==='true') ||
-            (process.env.APPVEYOR && process.env.APPVEYOR==='True') ||
-            (process.env.CI && process.env.CI==='true')
-        ) {
+        if (process.env.TRAVIS || process.env.APPVEYOR || process.env.CI) {
             return callback && callback(null, true);
         }
 
@@ -42,6 +38,25 @@ class SentryPlugin extends PluginBase {
             }
             if (hostObj && typeof hostObj.common && hostObj.common.disableDataReporting) {
                 return callback && callback(null, true);
+            }
+        } else if (this.pluginScope === this.SCOPES.CONTROLLER) {
+            let hostObjName = this.parentNamespace;
+            if (!hostObjName) {
+                const posPluginInNamespace = this.pluginNamespace.indexOf('.plugins.sentry');
+                if (posPluginInNamespace !== -1) {
+                    hostObjName = this.pluginNamespace.substr(0,posPluginInNamespace - 1);
+                }
+            }
+            if (hostObjName) {
+                let hostObj;
+                try {
+                    hostObj = await this.getObjectAsync(hostObjName);
+                } catch {
+                    // ignore
+                }
+                if (hostObj && typeof hostObj.common && hostObj.common.disableDataReporting) {
+                    return callback && callback(null, true);
+                }
             }
         }
 
@@ -111,7 +126,7 @@ class SentryPlugin extends PluginBase {
                 if (this.settings && this.settings.controllerVersion) {
                     scope.setTag('jsControllerVersion', this.settings.controllerVersion);
                 }
-                scope.setTag('nodejsPlatform', process.platform);
+                scope.setTag('osPlatform', process.platform);
                 scope.setTag('nodejsVersion', process.version);
             }
 
@@ -128,6 +143,9 @@ class SentryPlugin extends PluginBase {
                     const eventData = event.exception.values[0];
                     // if error type is one from blacklist we ignore this error
                     if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
+                        return null;
+                    }
+                    if (eventData.type && eventData.type === 'Error' && eventData.title && (eventData.title.includes('EROFS') || eventData.title.includes('ENOSPC'))) {
                         return null;
                     }
                     if (eventData.stacktrace && eventData.stacktrace.frames && Array.isArray(eventData.stacktrace.frames) && eventData.stacktrace.frames.length) {
