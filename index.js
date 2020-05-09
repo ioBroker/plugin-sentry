@@ -36,7 +36,7 @@ class SentryPlugin extends PluginBase {
             } catch {
                 // ignore
             }
-            if (hostObj && typeof hostObj.common && hostObj.common.disableDataReporting) {
+            if (hostObj && hostObj.common && hostObj.common.disableDataReporting) {
                 return callback && callback(null, true);
             }
         } else if (this.pluginScope === this.SCOPES.CONTROLLER) {
@@ -44,7 +44,7 @@ class SentryPlugin extends PluginBase {
             if (!hostObjName) {
                 const posPluginInNamespace = this.pluginNamespace.indexOf('.plugins.sentry');
                 if (posPluginInNamespace !== -1) {
-                    hostObjName = this.pluginNamespace.substr(0,posPluginInNamespace - 1);
+                    hostObjName = this.pluginNamespace.substr(0,posPluginInNamespace);
                 }
             }
             if (hostObjName) {
@@ -54,7 +54,7 @@ class SentryPlugin extends PluginBase {
                 } catch {
                     // ignore
                 }
-                if (hostObj && typeof hostObj.common && hostObj.common.disableDataReporting) {
+                if (hostObj && hostObj.common && hostObj.common.disableDataReporting) {
                     return callback && callback(null, true);
                 }
             }
@@ -145,7 +145,8 @@ class SentryPlugin extends PluginBase {
                     if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
                         return null;
                     }
-                    if (eventData.type && eventData.type === 'Error' && eventData.title && (eventData.title.includes('EROFS') || eventData.title.includes('ENOSPC'))) {
+                    // ignore EROFS and ENOSPC errors always
+                    if (eventData.type === 'Error' && typeof eventData.title === 'string' && (eventData.title.includes('EROFS') || eventData.title.includes('ENOSPC'))) {
                         return null;
                     }
                     if (eventData.stacktrace && eventData.stacktrace.frames && Array.isArray(eventData.stacktrace.frames) && eventData.stacktrace.frames.length) {
