@@ -13,7 +13,9 @@ When the js-controller crashes or an other Code error happens (and only then!), 
 
 All of this helps us developers to provide an error free smart home system that basically never crashes. :-)
 
-If you want to disable the error reporting you can do this by setting the state "system.host.NAME.plugins.sentry.enabled" (for js-controller hosts) or "system.adapter.NAME.INSTANCE.plugins.sentry.enabled" (for adapter instances) to false. You should see a log message stating that sentry was disabled. After disabling the plugin no crashes from your system are reported and so can not be fixed without reporting them by yourself manually!
+If you want to disable the error reporting you can do this by one of the followings ways:
+* use ioBroker CLI commands like `iobroker plugin disable sentry` (for the current host) or `iobroker plugin disable sentry --instance adaptername.nr` (for an adapter/instance)
+* set the state "system.host.NAME.plugins.sentry.enabled" (for js-controller hosts) or "system.adapter.NAME.INSTANCE.plugins.sentry.enabled" (for adapter instances) to false. You should see a log message stating that sentry was disabled. After disabling the plugin no crashes from your system are reported and so can not be fixed without reporting them by yourself manually!
 
 ## Plugin Configuration
 The minimal configuration which needs to be added to the common section of io-package.json is like:
