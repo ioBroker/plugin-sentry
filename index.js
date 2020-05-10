@@ -9,6 +9,7 @@ class SentryPlugin extends PluginBase {
      * @param {import('@iobroker/plugin-base').InitCallback} callback Will be called when done
      */
     async init(pluginConfig, callback) {
+        this.reallyEnabled = false;
         if (!pluginConfig.enabled) {
             this.log.info('Sentry Plugin disabled by user');
             return callback && callback(null, false);
@@ -20,11 +21,13 @@ class SentryPlugin extends PluginBase {
 
         // turn off on Travis, Appveyor or GitHub actions or other Systems that set "CI=true"
         if (process.env.TRAVIS || process.env.APPVEYOR || process.env.CI) {
+            this.log.info('Sentry Plugin disabled for this process because CI system detected');
             return callback && callback(null, true);
         }
 
         // turn off is parent Package contains disableDataReporting flag
         if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+            this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             return callback && callback(null, true);
         }
 
@@ -37,6 +40,7 @@ class SentryPlugin extends PluginBase {
                 // ignore
             }
             if (hostObj && hostObj.common && hostObj.common.disableDataReporting) {
+                this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                 return callback && callback(null, true);
             }
         } else if (this.pluginScope === this.SCOPES.CONTROLLER) {
@@ -55,6 +59,7 @@ class SentryPlugin extends PluginBase {
                     // ignore
                 }
                 if (hostObj && hostObj.common && hostObj.common.disableDataReporting) {
+                    this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                     return callback && callback(null, true);
                 }
             }
@@ -67,6 +72,7 @@ class SentryPlugin extends PluginBase {
             // ignore
         }
         if (!systemConfig || !systemConfig.common || systemConfig.common.diag === 'none') {
+            this.log.info('Sentry Plugin disabled for this process because sending of statistic data is disabled for the system');
             return callback && callback(null, true);
         }
 
@@ -82,6 +88,7 @@ class SentryPlugin extends PluginBase {
     }
 
     _registerSentry(pluginConfig, uuid, callback) {
+        this.reallyEnabled = true;
         // Require needed tooling
         this.Sentry = require('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
