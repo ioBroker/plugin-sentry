@@ -153,7 +153,7 @@ class SentryPlugin extends PluginBase {
                         return null;
                     }
                     // ignore EROFS and ENOSPC errors always
-                    if (eventData.type === 'Error' && typeof eventData.title === 'string' && (eventData.title.includes('EROFS') || eventData.title.includes('ENOSPC'))) {
+                    if (eventData.type === 'Error' && typeof eventData.title === 'string' && (eventData.title.includes('EROFS') || eventData.title.includes('ENOSPC') || eventData.title.includes('ENOMEM'))) {
                         return null;
                     }
                     if (eventData.stacktrace && eventData.stacktrace.frames && Array.isArray(eventData.stacktrace.frames) && eventData.stacktrace.frames.length) {

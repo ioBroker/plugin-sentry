@@ -131,6 +131,9 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
+### 1.1.2 (2020-05-12)
+* (Apollon77) also filter out ENOMEM errors
+
 ### 1.1.1 (2020-05-10)
 * (Apollon77) add more logging on temporary disable reasons
 
