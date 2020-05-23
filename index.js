@@ -153,7 +153,16 @@ class SentryPlugin extends PluginBase {
                         return null;
                     }
                     // ignore EROFS and ENOSPC errors always
-                    if (eventData.type === 'Error' && typeof eventData.title === 'string' && (eventData.title.includes('EROFS') || eventData.title.includes('ENOSPC') || eventData.title.includes('ENOMEM'))) {
+                    if (
+                        eventData.type === 'Error' &&
+                        typeof eventData.title === 'string' && (
+                            eventData.title.includes('EROFS:') || // Read only FS
+                            eventData.title.includes('ENOSPC:') || // No disk space available
+                            eventData.title.includes('ENOMEM:') || // No memory (RAM) available
+                            eventData.title.includes('EIO:') || // I/O error
+                            eventData.title.includes('EBADF:') // Bad file descriptor
+                        )
+                    ) {
                         return null;
                     }
                     if (eventData.stacktrace && eventData.stacktrace.frames && Array.isArray(eventData.stacktrace.frames) && eventData.stacktrace.frames.length) {
