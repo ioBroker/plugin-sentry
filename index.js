@@ -160,6 +160,7 @@ class SentryPlugin extends PluginBase {
                             eventData.title.includes('ENOSPC:') || // No disk space available
                             eventData.title.includes('ENOMEM:') || // No memory (RAM) available
                             eventData.title.includes('EIO:') || // I/O error
+                            eventData.title.includes('EMFILE:') || // too many open files
                             eventData.title.includes('EBADF:') // Bad file descriptor
                         )
                     ) {

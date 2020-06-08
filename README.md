@@ -131,6 +131,9 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
+### 1.1.4 (2020-06-08)
+* (Apollon77) also filter out EMFILE errors
+
 ### 1.1.3 (2020-05-24)
 * (Apollon77) also filter out EIO and EBADF errors
 
