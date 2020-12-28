@@ -135,6 +135,7 @@ class SentryPlugin extends PluginBase {
                 }
                 scope.setTag('osPlatform', process.platform);
                 scope.setTag('nodejsVersion', process.version);
+                scope.setTag('plugin-sentry', require('./package.json').version);
             }
 
             if (uuid) {
