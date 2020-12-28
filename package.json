@@ -1,6 +1,6 @@
 {
   "name": "@iobroker/plugin-sentry",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Sentry module for plugins for js-controller and adapters",
   "author": {
     "name": "Ingo Fischer",
