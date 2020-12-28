@@ -131,6 +131,10 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* (Apollon77) fix the filtering of unwanted error
+* (Apollon77) update dependencies
+
 ### 1.1.4 (2020-06-08)
 * (Apollon77) also filter out EMFILE errors
 
