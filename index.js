@@ -143,7 +143,7 @@ class SentryPlugin extends PluginBase {
                 });
             }
 
-            scope.addEventProcessor((event, _hint) => {
+            scope.addEventProcessor((event, hint) => {
                 if (!this.isActive) return;
                 // Try to filter out some events
                 if (event.exception && event.exception.values && event.exception.values[0]) {
@@ -152,16 +152,19 @@ class SentryPlugin extends PluginBase {
                     if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
                         return null;
                     }
-                    // ignore EROFS and ENOSPC errors always
+                    // ignore EROFS, ENOSPC and such errors always
+                    let errorText = (hint.originalException && hint.originalException.code) ? hint.originalException.code.toString() : ((hint.originalException && hint.originalException.message) ? hint.originalException.message.toString() : hint.originalException);
+
                     if (
-                        eventData.type === 'Error' &&
-                        typeof eventData.title === 'string' && (
-                            eventData.title.includes('EROFS:') || // Read only FS
-                            eventData.title.includes('ENOSPC:') || // No disk space available
-                            eventData.title.includes('ENOMEM:') || // No memory (RAM) available
-                            eventData.title.includes('EIO:') || // I/O error
-                            eventData.title.includes('EMFILE:') || // too many open files
-                            eventData.title.includes('EBADF:') // Bad file descriptor
+                        typeof errorText === 'string' &&
+                        (
+                            errorText.includes('EROFS') || // Read only FS
+                            errorText.includes('ENOSPC') || // No disk space available
+                            errorText.includes('ENOMEM') || // No memory (RAM) available
+                            errorText.includes('EIO') || // I/O error
+                            errorText.includes('EMFILE') || // too many open files
+                            errorText.includes('ENFILE') || // file table overflow
+                            errorText.includes('EBADF') // Bad file descriptor
                         )
                     ) {
                         return null;
