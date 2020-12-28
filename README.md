@@ -131,7 +131,7 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 1.1.5 (2020-12-28)
 * (Apollon77) fix the filtering of unwanted error
 * (Apollon77) update dependencies
 
