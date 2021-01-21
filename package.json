@@ -27,15 +27,15 @@
   "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
   "dependencies": {
     "@iobroker/plugin-base": "^1.2.0",
-    "@sentry/node": "^5.30.0",
-    "@sentry/integrations": "^5.30.0",
+    "@sentry/node": "^6.0.1 ",
+    "@sentry/integrations": "^6.0.1",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^1.8.3",
-    "@types/node": "^14.14.21",
-    "eslint": "^7.17.0",
-    "eslint-config-prettier": "^7.1.0",
+    "@types/node": "^14.14.22",
+    "eslint": "^7.18.0",
+    "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1"
   }
 }
