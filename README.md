@@ -131,7 +131,7 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 1.1.9 (2021-01-24)
 * (Apollon77) upgrade plugin-base to catch some errors better
 
 ### 1.1.8 (2021-01-21)
