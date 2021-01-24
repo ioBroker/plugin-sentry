@@ -131,6 +131,9 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* (Apollon77) upgrade plugin-base to catch some errors better
+
 ### 1.1.8 (2021-01-21)
 * (Apollon77) upgrade deps to allow tracking on session level later
 
