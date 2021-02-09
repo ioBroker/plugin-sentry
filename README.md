@@ -131,7 +131,7 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 1.1.10 (2021-02-09)
 * (Apollon77) Add ENXIO as ignored error
 
 ### 1.1.9 (2021-01-24)
