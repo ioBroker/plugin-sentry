@@ -167,6 +167,7 @@ class SentryPlugin extends PluginBase {
                             errorText.includes('ENOSPC') || // No disk space available
                             errorText.includes('ENOMEM') || // No memory (RAM) available
                             errorText.includes('EIO') || // I/O error
+                            errorText.includes('ENXIO') || // I/O error
                             errorText.includes('EMFILE') || // too many open files
                             errorText.includes('ENFILE') || // file table overflow
                             errorText.includes('EBADF') // Bad file descriptor
