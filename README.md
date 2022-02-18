@@ -131,7 +131,7 @@ The adapter should crash in this place and the exception should be shown in the 
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 1.2.0 (2022-02-19)
 * (Apollon77) Add db types to sentry data
 
 ### 1.1.10 (2021-02-09)
