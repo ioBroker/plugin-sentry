@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@alcalzone/release-script": "^2.2.2",
-    "@types/node": "^17.0.18",
+    "@types/node": "^17.0.21",
     "eslint": "^8.9.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0"
