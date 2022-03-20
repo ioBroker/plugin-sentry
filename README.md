@@ -129,7 +129,14 @@ setTimeout(huhu, 10000);
 
 The adapter should crash in this place and the exception should be shown in the sentry UI some seconds/minutes later
 
+<!--
+	Placeholder for the next version (at the beginning of the line):
+	### **WORK IN PROGRESS**
+-->
+
 ## Changelog
+### **WORK IN PROGRESS**
+* (bluefox) Update packages
 
 ### 1.2.0 (2022-02-19)
 * (Apollon77) Add db types to sentry data
