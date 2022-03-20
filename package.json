@@ -7,8 +7,15 @@
     "email": "iobroker@fischer-ka.de"
   },
   "main": "index.js",
+  "files": [
+    "index.js",
+    "LICENSE"
+  ],
   "scripts": {
-    "release": "release-script"
+    "release": "release-script",
+    "release-patch": "release-script patch --yes",
+    "release-minor": "release-script minor --yes",
+    "release-major": "release-script major --yes"
   },
   "repository": {
     "type": "git",
