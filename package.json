@@ -39,7 +39,7 @@
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
-    "@alcalzone/release-script": "^2.2.2",
+    "@alcalzone/release-script": "^3.5.6",
     "@types/node": "^17.0.23",
     "eslint": "^8.12.0",
     "eslint-config-prettier": "^8.5.0",
