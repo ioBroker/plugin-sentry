@@ -34,7 +34,7 @@
   "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
   "dependencies": {
     "@iobroker/plugin-base": "^1.2.1",
-    "@sentry/node": "^6.19.7",
+    "@sentry/node": "^7.0.0",
     "@sentry/integrations": "^6.19.7",
     "source-map-support": "^0.5.21"
   },
