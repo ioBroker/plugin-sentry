@@ -1,26 +1,36 @@
-# plugin-sentry
-Sentry Plugin for ioBroker js-controller and Adapters
+# Plugin Sentry
+Facilitates the integration of the Sentry error tracking and monitoring service into the js-controller and adapters, allowing developers to monitor and track any errors occurring within ioBroker setups.
 
-This is a simple plugin for ioBroker. It gets initialized when js-controller or Adapter that uses it gets started and registers with Sentry as error reporting tool.
+## Purpose
+By configuring Sentry.io, developers can receive real-time notifications and detailed reports of errors or exceptions in ioBroker systems, helping to identify and resolve issues promptly and ensuring the stability and reliability of home automation setups.
 
-## What is Sentry/Sentry.io?
+The integration with our Sentry server enables users to gather valuable information about the errors, including the stack trace, affected devices, and other relevant data. This information helps analyze and debug the problems effectively, leading to improved performance and stability of the ioBroker system.
 
-Sentry.io is a way for developers to get an overview about errors from their applications. The ioBroker js-controller uses this method to make sure application crashes are reported to the ioBroker Core developers. Adapters can integrate Sentry error reporting also when relevant. With this the adapter developer can make sure to provide fixes for problems very fast and crashes do not stay unseen.
+Providing consent to iobroker GmbH to collect diagnostic data, results in the inclusion of an anonymous installation ID  **without** any additional information about you, such as email or name) is included. This enables Sentry to group errors and gain insight into the number of unique users affected by a particular error. It's important to note that no IP addresses are present within crash reports, with all data deleted within 90 days at the latest.
 
-Especially with the automatic restart behaviour of ioBroker and adapters some crashes happen and no one really see them. And so we also do not get bug reports for them. With this method the information are provided to us completely automatically. 
+All of this helps developers to provide an error free smart home system that never crashes. :-)
 
-When the js-controller crashes or an other Code error happens (and only then!), this error, that also appears in the ioBroker log, is submitted to our own Sentry server hosted in Germany. If you have allowed iobroker GmbH to collect diagnostic data then also your anonymous installation ID (this is just a unique ID **without** any additional infos about you, email, name or such) is included. This allows Sentry to group errors and show how many unique users are affected by such an error. IP addresses are not stored with the crash report! All data are deleted latest after 90 days.
+## Disabling error reporting
+If you wish to deactivate the error reporting feature, you have a couple of options:
 
-All of this helps us developers to provide an error free smart home system that basically never crashes. :-)
+1. Use the ioBroker CLI commands:  
+    - To disable Sentry for the current host, use:  
+`iobroker plugin disable sentry`.
+    - To disable Sentry for a specific adapter/instance, use:  
+    `iobroker plugin disable sentry --instance adaptername.nr`
+1. Adjust the corresponding state values:
 
-If you want to disable the error reporting you can do this by one of the followings ways:
-* use ioBroker CLI commands like `iobroker plugin disable sentry` (for the current host) or `iobroker plugin disable sentry --instance adaptername.nr` (for an adapter/instance)
-* set the state "system.host.NAME.plugins.sentry.enabled" (for js-controller hosts) or "system.adapter.NAME.INSTANCE.plugins.sentry.enabled" (for adapter instances) to false. You should see a log message stating that sentry was disabled. After disabling the plugin no crashes from your system are reported and so can not be fixed without reporting them by yourself manually!
+    - For js-controller hosts, set the state "system.host.NAME.plugins.sentry.enabled" to false.
+    - Set the state "system.adapter.NAME.INSTANCE.plugins.sentry.enabled" to false for adapter instances.
+  
+Upon making these changes, you should see a log message confirming the disabling of Sentry.  
 
-## Plugin Configuration
-The minimal configuration which needs to be added to the common section of io-package.json is like:
+**Note: Once the plugin is disabled, the automatic reporting of system crashes will cease. If you still want to report any issues, you must do so manually.**
 
-```
+## Plugin configuration
+The minimal configuration required for inclusion in the common section of io-package.json is as follows:
+
+```json
 "plugins": {
     "sentry": {
         "dsn": "https://...@.../..."
@@ -28,9 +38,9 @@ The minimal configuration which needs to be added to the common section of io-pa
 }
 ```
 
-If needed there are two more optional configuration options that can be also be provided:
+Two additional optional configuration options that can be also be provided if required:
 
-```
+```json
 "plugins": {
     "sentry": {
         "dsn": "https://...@.../...",
@@ -41,49 +51,53 @@ If needed there are two more optional configuration options that can be also be 
 }
 ```
 
+The configuration includes the following settings:
 
-The configuration contains the following settings:
-* **dsn**: Required. This is the Sentry DSN as displayed after creation of the sentry project
-* **pathWhitelist**: Optional array with strings that needs to be part of the path to be included for reporting. Exceptions that do not contain one of these strings in the reported filenames will not be sent! The current name of the adapter the plugin is used in is automatically added.
-* **pathBlacklist**: Optional array with strings that are checked against all exception lines and as soon as one line contains this string the exception is not send.
-* **errorBlacklist**: Optional array with error types that will not be reported. "SyntaxError" is added automatically because these should be found on development time and not with real customers. 
+- **dsn** (Required): This is the Sentry DSN, obtained after creating the Sentry project.
 
-The configuration can be contained in io-package.json in common area or for js-controller in iobroker.data/iobroker.json on main level.
+- **pathWhitelist** (Optional): An array of strings that specify the required path components for reporting. Only sends exceptions with filenames containing at least one of these strings.
 
-### How can I get my Sentry account as a developer?
-One option is to use the free sentry service from [Sentry.io](https://sentry.io/). Here you can sign up and get an account up to 5.000 events per month for free. Here you have full control, but the Service ist hosted in the USA!
+- **pathBlacklist** (Optional): An array of strings used to check against each exception's lines. The exception will not send if any line contains one of these strings.
 
-A second option is to contact @Apollon77 to discuss to get an account on the ioBroker own Sentry Server instance, but this might be limited by the available server resources, so we will not promise this!
+- **errorBlacklist** (Optional): An array of error types that will not be reported. Automatically adds the "SyntaxError" type since these errors are typically caught during development and not in production with real customers.
 
-The basic process to use the ioBroker Sentry system will be:
-* You contact @Apollon77 by creating an issue here in this project for each adapter you want access and provice the link to the adapter repository
-* We will do a enhanced Adapter review especially looking for error handling (because we do not want adapters flooding the sentry system)
-* We will need an email to invite you to the Sentry instance and you need s Two-Factor-Auth App (e.g. Google Authenticator) to secure that account
-* We will create the project on sentry and assign it to you
-* We will provide the needed Sentry dsn for your configuration
-* You add the configuration to io-package.json and a short info section to your README
-Readme add to top please:
-```
-**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
-```
-* If you want to transfer own errors or other events we also talk about that in detail then
-* Then you can test and release it. 
+Define configurations in either the "common" area of the io-package.json file or in iobroker.data/iobroker.json at the main level, specifically for the js-controller.
 
-## Plugin States
+## How can I get my Sentry account as a developer?
+To obtain a Sentry account as a developer, you have a couple of options:
 
-This plugin respects the "enabled" state created as system.adapter.name.X.plugins.sentry.enabled and will **not** initialize the error reporting if set to false.
+1. **Sentry.io**: You can sign up for a free account on [Sentry.io](https://sentry.io/), which offers up to 5,000 monthly events at no cost. With this option, you have complete control over your account, but it's important to note that the service is hosted in the USA.
 
-Additional states are not created.
+2. **Contact @Apollon77**: Another option is to reach out to @Apollon77 to discuss the possibility of getting an account on the ioBroker own Sentry Server instance. However, please be aware that this option may be subject to limitations based on available server resources, so it cannot be guaranteed.
+
+The basic process to use the ioBroker Sentry system is as follows:
+
+1. Contact @Apollon77 by creating an issue in this project for each adapter you require access to. Make sure to include the link to the adapter repository.
+1. We will conduct an enhanced adapter review, specifically focusing on error handling to ensure that adapters do not flood the Sentry system.
+1. We will need your email address to invite you to the Sentry instance, and you will need a Two-Factor-Authentication app (e.g., Google Authenticator) to secure your account.
+1. We will create the project on Sentry and assign it to you.
+1. We will provide you with the necessary Sentry DSN for your configuration.
+1. You must add the configuration to the io-package.json file and include a short information section in your README. Please add the following notice to the top of your README:  
+`**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and instructions on disabling error reporting, please refer to the [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Use of Sentry reporting starts with js-controller 3.0.`
+1. We can discuss the details separately if you wish to transfer your own errors or other events.
+1. With everything finally set up, you can test and release your adapter.
+
+Please follow these steps for smooth integration with the ioBroker Sentry system.
+
+## Plugin states
+
+This plugin respects the "enabled" state created by system.adapter.name.X.plugins.sentry.enabled and will **not** initialize the error reporting if set to false.
+
+Will not create additional states.
 
 ## Usage
 
-### Catch uncatched exceptions and unhandled promises
-You just need to add the above configuration to io-package.json common section and you are done. As soon as js-controller 3.0 is used the plugin gets also used
+To catch uncaught exceptions and unhandled promises, add the configuration above to the common section of your io-package.json file. Once you have done that, you're all set. Automatic use of the plugin will occur when js-controller 3.0 is in use.
 
-### Send own Errors to Sentry
-In cases where you want to report own errors or error you alreayd catched in your code also to Sentry you can use code like this in your adapter implementation ("error" in example is the Error object with the error)
+### Send specific errors to Sentry
+If you want to send current errors or errors you have already caught in your code to Sentry, you can use the following code in your adapter implementation. In the example, "error" refers to the Error object containing the error.
 
-```
+```javascript
 try {
     ...
     throw new Error('...');
@@ -97,10 +111,10 @@ try {
 }
 ```
 
-### Send own additional Events to Sentry
-In case that you want to send other events you can also use other Sentry APIs offered by the JavaScript Sentry SDK (https://docs.sentry.io/platforms/javascript/).
+### Send additional events to Sentry
+You can also use other Sentry APIs offered by the [JavaScript Sentry SDK](https://docs.sentry.io/platforms/javascript/) to send additional events.
 
-```
+```javascript
 if (adapter.supportsFeature && adapter.supportsFeature('PLUGINS')) {
     const sentryInstance = adapter.getPluginInstance('sentry');
     if (sentryInstance) {
@@ -114,20 +128,16 @@ if (adapter.supportsFeature && adapter.supportsFeature('PLUGINS')) {
 }
 ```
 
-## How to test Sentry integration
+## Test Sentry integration
 The easiest way is to add an invalid call to your code, e.g.
 
-```
-huhu();
-```
+`huhu();`
 
 or 
 
-```
-setTimeout(huhu, 10000);
-```
+`setTimeout(huhu, 10000);`
 
-The adapter should crash in this place and the exception should be shown in the sentry UI some seconds/minutes later
+This should cause the adapter to crash and the exception to be shown in the sentry UI some seconds/minutes later
 
 <!--
 	Placeholder for the next version (at the beginning of the line):
