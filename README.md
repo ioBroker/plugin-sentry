@@ -4,11 +4,13 @@ Facilitates the integration of the Sentry error tracking and monitoring service 
 ## Purpose
 By configuring Sentry.io, developers can receive real-time notifications and detailed reports of errors or exceptions in ioBroker systems, helping to identify and resolve issues promptly and ensuring the stability and reliability of home automation setups.
 
-The integration with our Sentry server enables users to gather valuable information about the errors, including the stack trace, affected devices, and other relevant data. This information helps analyze and debug the problems effectively, leading to improved performance and stability of the ioBroker system.
+The integration with our Sentry server enables users to gather valuable information about the errors, including the stack trace, affected devices, and other relevant data.
+This information helps analyze and debug the problems effectively, leading to improved performance and stability of the ioBroker system.
 
-Providing consent to iobroker GmbH to collect diagnostic data, results in the inclusion of an anonymous installation ID  **without** any additional information about you, such as email or name) is included. This enables Sentry to group errors and gain insight into the number of unique users affected by a particular error. It's important to note that no IP addresses are present within crash reports, with all data deleted within 90 days at the latest.
+Providing consent to iobroker GmbH to collect diagnostic data, results in the inclusion of an anonymous installation ID **without** any additional information about you, such as email or name, is included.
+This enables Sentry to group errors and gains insight into the number of unique users affected by a particular error. It's important to note that no IP addresses are present within crash reports, with all data deleted within 90 days at the latest.
 
-All of this helps developers to provide an error free smart home system that never crashes. :-)
+All of these helps developers to provide an error-free smart home system that never crashes. :-)
 
 ## Disabling error reporting
 If you wish to deactivate the error reporting feature, you have a couple of options:
@@ -38,7 +40,7 @@ The minimal configuration required for inclusion in the common section of io-pac
 }
 ```
 
-Two additional optional configuration options that can be also be provided if required:
+Two additional optional configuration options that can be also provided if required:
 
 ```json
 "plugins": {
@@ -129,7 +131,7 @@ if (adapter.supportsFeature && adapter.supportsFeature('PLUGINS')) {
 ```
 
 ## Test Sentry integration
-The easiest way is to add an invalid call to your code, e.g.
+The easiest way is to add an invalid call to your code, e.g.,
 
 `huhu();`
 

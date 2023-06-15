@@ -27,13 +27,13 @@ class SentryPlugin extends PluginBase {
             return callback && callback(null, true);
         }
 
-        // turn off is parent Package contains disableDataReporting flag
+        // turn off if parent Package contains disableDataReporting flag
         if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             return callback && callback(null, true);
         }
 
-        // for Adapter also check host disableDataReporting flag
+        // for Adapter also check the host disableDataReporting flag
         if (
             this.pluginScope === this.SCOPES.ADAPTER &&
             this.parentIoPackage &&
@@ -125,7 +125,7 @@ class SentryPlugin extends PluginBase {
         }
 
         this.Sentry.init({
-            release: this.parentPackage.name + '@' + this.parentPackage.version,
+            release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
             integrations: [new SentryIntegrations.Dedupe()]
         });
@@ -174,7 +174,7 @@ class SentryPlugin extends PluginBase {
                 // Try to filter out some events
                 if (event.exception && event.exception.values && event.exception.values[0]) {
                     const eventData = event.exception.values[0];
-                    // if error type is one from blacklist we ignore this error
+                    // if the error type is one from the blacklist, we ignore this error
                     if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
                         return null;
                     }
@@ -205,7 +205,7 @@ class SentryPlugin extends PluginBase {
                         Array.isArray(eventData.stacktrace.frames) &&
                         eventData.stacktrace.frames.length
                     ) {
-                        // if last exception frame is from an nodejs internal method we ignore this error
+                        // if the last exception frame is from a nodejs internal method, we ignore this error
                         if (
                             eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename &&
                             (eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
@@ -253,7 +253,7 @@ class SentryPlugin extends PluginBase {
     }
 
     /**
-     * Return Sentry object. This can be used to send own Messages or such
+     * Return the Sentry object. This can be used to send own Messages or such
      * @returns {object} Sentry object
      */
     getSentryObject() {
