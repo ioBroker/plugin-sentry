@@ -3,7 +3,5 @@
 	"license": [
 		"{LICENSE,README}{,.md}"
 	],
-	"ioPackage": "packages/controller",
-	"ioPackageNoPrerelease": true,
 	"publishAll": true
 }
