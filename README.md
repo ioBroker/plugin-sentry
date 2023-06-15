@@ -147,7 +147,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 1.2.1 (2023-06-15)
 * (bluefox) Update packages
 
 ### 1.2.0 (2022-02-19)
