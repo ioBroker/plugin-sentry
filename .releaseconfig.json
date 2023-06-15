@@ -1,8 +1,7 @@
 {
 	"plugins": ["iobroker", "manual-review", "license"],
 	"license": [
-		"{LICENSE,README}{,.md}",
-		"packages/*/{LICENSE,README}{,.md}"
+		"{LICENSE,README}{,.md}"
 	],
 	"ioPackage": "packages/controller",
 	"ioPackageNoPrerelease": true,
