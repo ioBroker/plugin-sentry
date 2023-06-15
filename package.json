@@ -9,7 +9,8 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "LICENSE"
+    "LICENSE",
+    "package-lock.json"
   ],
   "scripts": {
     "release": "release-script",
