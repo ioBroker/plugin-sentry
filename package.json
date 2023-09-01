@@ -42,7 +42,7 @@
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",
     "@alcalzone/release-script-plugin-license": "^3.5.9",
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.5.7",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1"
