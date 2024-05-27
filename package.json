@@ -8,11 +8,12 @@
   },
   "main": "index.js",
   "files": [
-    "index.js",
-    "LICENSE",
-    "package-lock.json"
+    "build",
+    "LICENSE"
   ],
   "scripts": {
+    "prebuild": "rimraf ./build",
+    "build": "tsc -p tsconfig.json",
     "release": "release-script",
     "release-patch": "release-script patch --yes",
     "release-minor": "release-script minor --yes",
@@ -34,17 +35,18 @@
   },
   "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
   "dependencies": {
-    "@iobroker/plugin-base": "^1.2.1",
-    "@sentry/node": "^7.55.2",
+    "@iobroker/plugin-base": "^2.0.1",
     "@sentry/integrations": "^7.55.2",
+    "@sentry/node": "^7.55.2",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",
     "@alcalzone/release-script-plugin-license": "^3.5.9",
+    "@foxriver76/eslint-config": "^1.0.4",
+    "@iobroker/types": "^6.0.0",
     "@types/node": "^20.3.1",
-    "eslint": "^8.42.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-prettier": "^4.2.1"
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5"
   }
 }

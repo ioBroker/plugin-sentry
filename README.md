@@ -147,6 +147,10 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+* (foxriver76) work with plugin base v2
+* (foxriver76) ported to TypeScript to provide improved type support
+
 ### 1.2.1 (2023-06-15)
 * (bluefox) Update packages
 
