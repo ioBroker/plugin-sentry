@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SentryPlugin = void 0;
 const plugin_base_1 = require("@iobroker/plugin-base");
 class SentryPlugin extends plugin_base_1.PluginBase {
     constructor() {
@@ -233,4 +232,4 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         return this.Sentry;
     }
 }
-exports.SentryPlugin = SentryPlugin;
+exports.default = SentryPlugin;

@@ -147,6 +147,9 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### 2.0.3 (2024-06-01)
+* (foxriver76) provide default and named export
+
 ### 2.0.2 (2024-06-01)
 * (foxriver76) changed export to named export
 
