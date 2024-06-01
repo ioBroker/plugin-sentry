@@ -1,12 +1,13 @@
 {
   "name": "@iobroker/plugin-sentry",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Sentry module for plugins for js-controller and adapters",
   "author": {
     "name": "Ingo Fischer",
     "email": "iobroker@fischer-ka.de"
   },
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
     "build",
     "LICENSE"
