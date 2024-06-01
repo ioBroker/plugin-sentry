@@ -1,5 +1,5 @@
 import { PluginBase } from '@iobroker/plugin-base';
-export default class SentryPlugin extends PluginBase {
+declare class SentryPlugin extends PluginBase {
     /** The Sentry instance */
     Sentry: typeof import('@sentry/node');
     /** If plugin is enabled after all checks */
@@ -17,5 +17,4 @@ export default class SentryPlugin extends PluginBase {
      */
     getSentryObject(): typeof this.Sentry;
 }
-/** Type for a Sentry Instance */
-export type SentryInstance = InstanceType<typeof SentryPlugin>;
+export = SentryPlugin;

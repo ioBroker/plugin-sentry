@@ -147,16 +147,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
-### 2.0.3 (2024-06-01)
-* (foxriver76) provide default and named export
-
-### 2.0.2 (2024-06-01)
-* (foxriver76) changed export to named export
-
-### 2.0.1 (2024-06-01)
-* (foxriver76) fixed `types` and `main` file export
-
-### 2.0.0 (2024-06-01)
+### 2.0.4 (2024-06-01)
 * (foxriver76) work with plugin base v2
 * (foxriver76) ported to TypeScript to provide improved type support
 

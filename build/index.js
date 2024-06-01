@@ -1,19 +1,16 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const plugin_base_1 = require("@iobroker/plugin-base");
 class SentryPlugin extends plugin_base_1.PluginBase {
-    constructor() {
-        super(...arguments);
-        /** If plugin is enabled after all checks */
-        this.reallyEnabled = false;
-    }
+    /** The Sentry instance */
+    Sentry;
+    /** If plugin is enabled after all checks */
+    reallyEnabled = false;
     /**
      * Register and initialize Sentry
      *
      * @param pluginConfig plugin configuration from config files
      */
     async init(pluginConfig) {
-        var _a, _b;
         if (!pluginConfig.enabled) {
             this.log.info('Sentry Plugin disabled by user');
             throw new Error('Sentry Plugin disabled by user');
@@ -39,11 +36,11 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             try {
                 hostObj = (await this.getObject(`system.host.${this.parentIoPackage.common.host}`));
             }
-            catch (_c) {
+            catch {
                 // ignore
             }
             // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
-            if ((_a = hostObj === null || hostObj === void 0 ? void 0 : hostObj.common) === null || _a === void 0 ? void 0 : _a.disableDataReporting) {
+            if (hostObj?.common?.disableDataReporting) {
                 this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                 throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
             }
@@ -61,11 +58,11 @@ class SentryPlugin extends plugin_base_1.PluginBase {
                 try {
                     hostObj = (await this.getObject(hostObjName));
                 }
-                catch (_d) {
+                catch {
                     // ignore
                 }
                 // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
-                if ((_b = hostObj === null || hostObj === void 0 ? void 0 : hostObj.common) === null || _b === void 0 ? void 0 : _b.disableDataReporting) {
+                if (hostObj?.common?.disableDataReporting) {
                     this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                     throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
                 }
@@ -75,7 +72,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         try {
             systemConfig = (await this.getObject('system.config'));
         }
-        catch (_e) {
+        catch {
             // ignore
         }
         if (!systemConfig || !systemConfig.common || systemConfig.common.diag === 'none') {
@@ -86,7 +83,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         try {
             uuidObj = (await this.getObject('system.meta.uuid'));
         }
-        catch (_f) {
+        catch {
             // ignore
         }
         const uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
@@ -140,7 +137,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
                 try {
                     scope.setTag('plugin-sentry', require('./package.json').version);
                 }
-                catch (_a) {
+                catch {
                     // ignore
                 }
                 if (this.iobrokerConfig) {
@@ -232,4 +229,4 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         return this.Sentry;
     }
 }
-exports.default = SentryPlugin;
+module.exports = SentryPlugin;
