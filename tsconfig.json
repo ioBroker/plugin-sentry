@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "moduleResolution": "node",
+    "module": "CommonJS",
+    "outDir": "./build/",
+    "allowJs": false,
+    "checkJs": false,
+    "noEmit": false,
+    "declaration": true,
+    "types": [
+      "@iobroker/types",
+      "node"
+    ]
+  }
+}

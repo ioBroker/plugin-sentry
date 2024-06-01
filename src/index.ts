@@ -1,36 +1,35 @@
-const { PluginBase } = require('@iobroker/plugin-base');
+import { PluginBase } from '@iobroker/plugin-base';
 
-class SentryPlugin extends PluginBase {
+export default class SentryPlugin extends PluginBase {
+    /** The Sentry instance */
+    Sentry: typeof import('@sentry/node');
+    /** If plugin is enabled after all checks */
+    reallyEnabled: boolean = false;
+
     /**
      * Register and initialize Sentry
      *
-     * @param {Record<string, any>} pluginConfig plugin configuration from config files
-     * @param {import('@iobroker/plugin-base').InitCallback} callback Will be called when done
+     * @param pluginConfig plugin configuration from config files
      */
-    async init(pluginConfig, callback) {
-        this.reallyEnabled = false;
+    async init(pluginConfig: Record<string, any>): Promise<void> {
         if (!pluginConfig.enabled) {
             this.log.info('Sentry Plugin disabled by user');
-            return callback && callback(null, false);
+            throw new Error('Sentry Plugin disabled by user');
         }
 
         if (!pluginConfig.dsn) {
-            return (
-                callback &&
-                callback(new Error('Invalid Sentry definition, no dsn provided. Disable error reporting'), false)
-            );
+            throw new Error('Invalid Sentry definition, no dsn provided. Disable error reporting');
         }
 
         // turn off on Travis, Appveyor or GitHub actions or other Systems that set "CI=true"
         if (process.env.TRAVIS || process.env.APPVEYOR || process.env.CI) {
-            this.log.info('Sentry Plugin disabled for this process because CI system detected');
-            return callback && callback(null, true);
+            throw new Error('Sentry Plugin disabled for this process because CI system detected');
         }
 
         // turn off if parent Package contains disableDataReporting flag
         if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
-            return callback && callback(null, true);
+            throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on instance');
         }
 
         // for Adapter also check the host disableDataReporting flag
@@ -40,15 +39,19 @@ class SentryPlugin extends PluginBase {
             this.parentIoPackage.common &&
             this.parentIoPackage.common.host
         ) {
-            let hostObj;
+            let hostObj: ioBroker.HostObject;
             try {
-                hostObj = await this.getObjectAsync(`system.host.${this.parentIoPackage.common.host}`);
+                hostObj = (await this.getObject(
+                    `system.host.${this.parentIoPackage.common.host}`
+                )) as ioBroker.HostObject;
             } catch {
                 // ignore
             }
-            if (hostObj && hostObj.common && hostObj.common.disableDataReporting) {
+
+            // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
+            if (hostObj?.common?.disableDataReporting) {
                 this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
-                return callback && callback(null, true);
+                throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
             }
         } else if (this.pluginScope === this.SCOPES.CONTROLLER) {
             let hostObjName = this.parentNamespace;
@@ -59,22 +62,26 @@ class SentryPlugin extends PluginBase {
                 }
             }
             if (hostObjName) {
-                let hostObj;
+                let hostObj: ioBroker.HostObject;
                 try {
-                    hostObj = await this.getObjectAsync(hostObjName);
+                    hostObj = (await this.getObject(hostObjName)) as ioBroker.HostObject;
                 } catch {
                     // ignore
                 }
-                if (hostObj && hostObj.common && hostObj.common.disableDataReporting) {
+
+                // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
+                if (hostObj?.common?.disableDataReporting) {
                     this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
-                    return callback && callback(null, true);
+                    throw new Error(
+                        'Sentry Plugin disabled for this process because data reporting is disabled on host'
+                    );
                 }
             }
         }
 
-        let systemConfig;
+        let systemConfig: ioBroker.SystemConfigObject;
         try {
-            systemConfig = await this.getObjectAsync('system.config');
+            systemConfig = (await this.getObject('system.config')) as ioBroker.SystemConfigObject;
         } catch {
             // ignore
         }
@@ -82,24 +89,26 @@ class SentryPlugin extends PluginBase {
             this.log.info(
                 'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system'
             );
-            return callback && callback(null, true);
+            throw new Error(
+                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system'
+            );
         }
 
-        let uuidObj;
+        let uuidObj: ioBroker.MetaObject;
         try {
-            uuidObj = await this.getObjectAsync('system.meta.uuid');
+            uuidObj = (await this.getObject('system.meta.uuid')) as ioBroker.MetaObject;
         } catch {
             // ignore
         }
-        let uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
+        const uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
 
-        this._registerSentry(pluginConfig, uuid, callback);
+        await this._registerSentry(pluginConfig, uuid);
     }
 
-    _registerSentry(pluginConfig, uuid, callback) {
+    private async _registerSentry(pluginConfig: Record<string, any>, uuid: string): Promise<void> {
         this.reallyEnabled = true;
         // Require needed tooling
-        this.Sentry = require('@sentry/node');
+        this.Sentry = await import('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
         // locations in error messages
@@ -170,7 +179,9 @@ class SentryPlugin extends PluginBase {
             }
 
             scope.addEventProcessor((event, hint) => {
-                if (!this.isActive) return;
+                if (!this.isActive) {
+                    return;
+                }
                 // Try to filter out some events
                 if (event.exception && event.exception.values && event.exception.values[0]) {
                     const eventData = event.exception.values[0];
@@ -178,13 +189,16 @@ class SentryPlugin extends PluginBase {
                     if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
                         return null;
                     }
+
+                    const originalException = hint.originalException as Record<string, any>;
+
                     // ignore EROFS, ENOSPC and such errors always
-                    let errorText =
-                        hint.originalException && hint.originalException.code
-                            ? hint.originalException.code.toString()
-                            : hint.originalException && hint.originalException.message
-                            ? hint.originalException.message.toString()
-                            : hint.originalException;
+                    const errorText =
+                        originalException && originalException.code
+                            ? originalException.code.toString()
+                            : originalException && originalException.message
+                              ? originalException.message.toString()
+                              : originalException;
 
                     if (
                         typeof errorText === 'string' &&
@@ -247,18 +261,14 @@ class SentryPlugin extends PluginBase {
 
                 return event;
             });
-
-            callback && callback(null, true);
         });
     }
 
     /**
      * Return the Sentry object. This can be used to send own Messages or such
-     * @returns {object} Sentry object
+     * @returns Sentry object
      */
-    getSentryObject() {
+    getSentryObject(): typeof this.Sentry {
         return this.Sentry;
     }
 }
-
-module.exports = SentryPlugin;
