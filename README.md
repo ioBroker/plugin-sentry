@@ -147,6 +147,9 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### 2.0.2 (2024-06-01)
+* (foxriver76) changed export to named export
+
 ### 2.0.1 (2024-06-01)
 * (foxriver76) fixed `types` and `main` file export
 
@@ -154,7 +157,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 * (foxriver76) work with plugin base v2
 * (foxriver76) ported to TypeScript to provide improved type support
 
-**Breaking Changes**: Due to the port to Plugin Base v2, `init` now returns a promise instead of accepting a callback parameter
+**Breaking Changes**: Due to the port to Plugin Base v2, `init` now returns a promise instead of accepting a callback parameter, also the export has changed to a named export
 
 ### 1.2.1 (2023-06-15)
 * (bluefox) Update packages
