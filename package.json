@@ -1,6 +1,6 @@
 {
   "name": "@iobroker/plugin-sentry",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "description": "Sentry module for plugins for js-controller and adapters",
   "author": {
     "name": "Ingo Fischer",
@@ -43,6 +43,7 @@
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",
     "@alcalzone/release-script-plugin-license": "^3.5.9",
+    "@alcalzone/release-script-plugin-manual-review": "^3.7.0",
     "@foxriver76/eslint-config": "^1.0.4",
     "@iobroker/types": "^6.0.0",
     "@types/node": "^20.3.1",
