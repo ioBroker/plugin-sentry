@@ -138,129 +138,128 @@ class SentryPlugin extends PluginBase {
             dsn: pluginConfig.dsn,
             integrations: [new SentryIntegrations.Dedupe()]
         });
-        this.Sentry.configureScope(scope => {
-            if (this.parentIoPackage && this.parentIoPackage.common) {
+        const scope = this.Sentry.getCurrentScope();
+        if (this.parentIoPackage && this.parentIoPackage.common) {
+            scope.setTag(
+                'version',
+                this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version
+            );
+            if (this.parentIoPackage.common.installedFrom) {
+                scope.setTag('installedFrom', this.parentIoPackage.common.installedFrom);
+            } else {
                 scope.setTag(
-                    'version',
+                    'installedFrom',
                     this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version
                 );
-                if (this.parentIoPackage.common.installedFrom) {
-                    scope.setTag('installedFrom', this.parentIoPackage.common.installedFrom);
-                } else {
-                    scope.setTag(
-                        'installedFrom',
-                        this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version
-                    );
+            }
+            if (this.settings && this.settings.controllerVersion) {
+                scope.setTag('jsControllerVersion', this.settings.controllerVersion);
+            }
+            scope.setTag('osPlatform', process.platform);
+            scope.setTag('nodejsVersion', process.version);
+            try {
+                scope.setTag('plugin-sentry', require('./package.json').version);
+            } catch {
+                // ignore
+            }
+            if (this.iobrokerConfig) {
+                if (this.iobrokerConfig.objects && this.iobrokerConfig.objects.type) {
+                    scope.setTag('objectDBType', this.iobrokerConfig.objects.type);
                 }
-                if (this.settings && this.settings.controllerVersion) {
-                    scope.setTag('jsControllerVersion', this.settings.controllerVersion);
-                }
-                scope.setTag('osPlatform', process.platform);
-                scope.setTag('nodejsVersion', process.version);
-                try {
-                    scope.setTag('plugin-sentry', require('./package.json').version);
-                } catch {
-                    // ignore
-                }
-                if (this.iobrokerConfig) {
-                    if (this.iobrokerConfig.objects && this.iobrokerConfig.objects.type) {
-                        scope.setTag('objectDBType', this.iobrokerConfig.objects.type);
-                    }
-                    if (this.iobrokerConfig.states && this.iobrokerConfig.states.type) {
-                        scope.setTag('statesDBType', this.iobrokerConfig.states.type);
-                    }
+                if (this.iobrokerConfig.states && this.iobrokerConfig.states.type) {
+                    scope.setTag('statesDBType', this.iobrokerConfig.states.type);
                 }
             }
+        }
 
-            if (uuid) {
-                scope.setUser({
-                    id: uuid
-                });
-            }
-
-            scope.addEventProcessor((event, hint) => {
-                if (!this.isActive) {
-                    return;
-                }
-                // Try to filter out some events
-                if (event.exception && event.exception.values && event.exception.values[0]) {
-                    const eventData = event.exception.values[0];
-                    // if the error type is one from the blacklist, we ignore this error
-                    if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
-                        return null;
-                    }
-
-                    const originalException = hint.originalException as Record<string, any>;
-
-                    // ignore EROFS, ENOSPC and such errors always
-                    const errorText =
-                        originalException && originalException.code
-                            ? originalException.code.toString()
-                            : originalException && originalException.message
-                              ? originalException.message.toString()
-                              : originalException;
-
-                    if (
-                        typeof errorText === 'string' &&
-                        (errorText.includes('EROFS') || // Read only FS
-                            errorText.includes('ENOSPC') || // No disk space available
-                            errorText.includes('ENOMEM') || // No memory (RAM) available
-                            errorText.includes('EIO') || // I/O error
-                            errorText.includes('ENXIO') || // I/O error
-                            errorText.includes('EMFILE') || // too many open files
-                            errorText.includes('ENFILE') || // file table overflow
-                            errorText.includes('EBADF')) // Bad file descriptor
-                    ) {
-                        return null;
-                    }
-                    if (
-                        eventData.stacktrace &&
-                        eventData.stacktrace.frames &&
-                        Array.isArray(eventData.stacktrace.frames) &&
-                        eventData.stacktrace.frames.length
-                    ) {
-                        // if the last exception frame is from a nodejs internal method, we ignore this error
-                        if (
-                            eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename &&
-                            (eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
-                                'internal/'
-                            ) ||
-                                eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
-                                    'Module.'
-                                ))
-                        ) {
-                            return null;
-                        }
-                        // Check if any entry is whitelisted from pathWhitelist
-                        const whitelisted = eventData.stacktrace.frames.find(frame => {
-                            if (frame.function && frame.function.startsWith('Module.')) {
-                                return false;
-                            }
-                            if (frame.filename && frame.filename.startsWith('internal/')) {
-                                return false;
-                            }
-                            if (
-                                frame.filename &&
-                                !sentryPathWhitelist.find(path => path && path.length && frame.filename.includes(path))
-                            ) {
-                                return false;
-                            }
-                            if (
-                                frame.filename &&
-                                sentryPathBlacklist.find(path => path && path.length && frame.filename.includes(path))
-                            ) {
-                                return false;
-                            }
-                            return true;
-                        });
-                        if (!whitelisted) {
-                            return null;
-                        }
-                    }
-                }
-
-                return event;
+        if (uuid) {
+            scope.setUser({
+                id: uuid
             });
+        }
+
+        scope.addEventProcessor((event, hint) => {
+            if (!this.isActive) {
+                return;
+            }
+            // Try to filter out some events
+            if (event.exception && event.exception.values && event.exception.values[0]) {
+                const eventData = event.exception.values[0];
+                // if the error type is one from the blacklist, we ignore this error
+                if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
+                    return null;
+                }
+
+                const originalException = hint.originalException as Record<string, any>;
+
+                // ignore EROFS, ENOSPC and such errors always
+                const errorText =
+                    originalException && originalException.code
+                        ? originalException.code.toString()
+                        : originalException && originalException.message
+                          ? originalException.message.toString()
+                          : originalException;
+
+                if (
+                    typeof errorText === 'string' &&
+                    (errorText.includes('EROFS') || // Read only FS
+                        errorText.includes('ENOSPC') || // No disk space available
+                        errorText.includes('ENOMEM') || // No memory (RAM) available
+                        errorText.includes('EIO') || // I/O error
+                        errorText.includes('ENXIO') || // I/O error
+                        errorText.includes('EMFILE') || // too many open files
+                        errorText.includes('ENFILE') || // file table overflow
+                        errorText.includes('EBADF')) // Bad file descriptor
+                ) {
+                    return null;
+                }
+                if (
+                    eventData.stacktrace &&
+                    eventData.stacktrace.frames &&
+                    Array.isArray(eventData.stacktrace.frames) &&
+                    eventData.stacktrace.frames.length
+                ) {
+                    // if the last exception frame is from a nodejs internal method, we ignore this error
+                    if (
+                        eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename &&
+                        (eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
+                            'internal/'
+                        ) ||
+                            eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
+                                'Module.'
+                            ))
+                    ) {
+                        return null;
+                    }
+                    // Check if any entry is whitelisted from pathWhitelist
+                    const whitelisted = eventData.stacktrace.frames.find(frame => {
+                        if (frame.function && frame.function.startsWith('Module.')) {
+                            return false;
+                        }
+                        if (frame.filename && frame.filename.startsWith('internal/')) {
+                            return false;
+                        }
+                        if (
+                            frame.filename &&
+                            !sentryPathWhitelist.find(path => path && path.length && frame.filename.includes(path))
+                        ) {
+                            return false;
+                        }
+                        if (
+                            frame.filename &&
+                            sentryPathBlacklist.find(path => path && path.length && frame.filename.includes(path))
+                        ) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (!whitelisted) {
+                        return null;
+                    }
+                }
+            }
+
+            return event;
         });
     }
 

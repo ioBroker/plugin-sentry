@@ -147,6 +147,9 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### __WORK IN PROGRESS__
+* (Apollon77) Update Sentry SDK to prevent issues in current Node.js versions
+
 ### 2.0.4 (2024-06-01)
 * (foxriver76) work with plugin base v2
 * (foxriver76) ported to TypeScript to provide improved type support
