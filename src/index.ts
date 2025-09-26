@@ -28,7 +28,8 @@ export default class SentryPlugin extends PluginBase {
         }
 
         // turn off if parent Package contains disableDataReporting flag
-        if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+        // @ts-expect-error fixed in js-controller
+        if (this.parentIoPackage?.common?.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on instance');
         }
@@ -37,9 +38,7 @@ export default class SentryPlugin extends PluginBase {
         if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage?.common?.host) {
             let hostObj: ioBroker.HostObject;
             try {
-                hostObj = (await this.getObject(
-                    `system.host.${this.parentIoPackage.common.host}`,
-                )) as ioBroker.HostObject;
+                hostObj = await this.getObject(`system.host.${this.parentIoPackage.common.host}`);
             } catch {
                 // ignore
             }
@@ -77,7 +76,7 @@ export default class SentryPlugin extends PluginBase {
 
         let systemConfig: ioBroker.SystemConfigObject;
         try {
-            systemConfig = (await this.getObject('system.config')) as ioBroker.SystemConfigObject;
+            systemConfig = await this.getObject('system.config');
         } catch {
             // ignore
         }
@@ -92,7 +91,7 @@ export default class SentryPlugin extends PluginBase {
 
         let uuidObj: ioBroker.MetaObject;
         try {
-            uuidObj = (await this.getObject('system.meta.uuid')) as ioBroker.MetaObject;
+            uuidObj = await this.getObject('system.meta.uuid');
         } catch {
             // ignore
         }

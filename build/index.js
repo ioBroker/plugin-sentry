@@ -25,7 +25,8 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             throw new Error('Sentry Plugin disabled for this process because CI system detected');
         }
         // turn off if parent Package contains disableDataReporting flag
-        if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+        // @ts-expect-error fixed in js-controller
+        if (this.parentIoPackage?.common?.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on instance');
         }
@@ -33,7 +34,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage?.common?.host) {
             let hostObj;
             try {
-                hostObj = (await this.getObject(`system.host.${this.parentIoPackage.common.host}`));
+                hostObj = await this.getObject(`system.host.${this.parentIoPackage.common.host}`);
             }
             catch {
                 // ignore
@@ -69,7 +70,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         }
         let systemConfig;
         try {
-            systemConfig = (await this.getObject('system.config'));
+            systemConfig = await this.getObject('system.config');
         }
         catch {
             // ignore
@@ -80,7 +81,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         }
         let uuidObj;
         try {
-            uuidObj = (await this.getObject('system.meta.uuid'));
+            uuidObj = await this.getObject('system.meta.uuid');
         }
         catch {
             // ignore
@@ -91,7 +92,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
     async _registerSentry(pluginConfig, uuid) {
         this.reallyEnabled = true;
         // Require needed tooling
-        this.Sentry = await Promise.resolve().then(() => require('@sentry/node'));
+        this.Sentry = await import('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
         // locations in error messages
