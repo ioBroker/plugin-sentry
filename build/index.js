@@ -152,7 +152,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         if (uuid) {
             this.Sentry.setUser({ id: uuid });
         }
-        const scope = this.Sentry.getCurrentScope ? this.Sentry.getCurrentScope() : undefined;
+        const scope = this.Sentry.getCurrentScope?.();
         if (scope) {
             scope.addEventProcessor((event, hint) => {
                 if (!this.isActive) {

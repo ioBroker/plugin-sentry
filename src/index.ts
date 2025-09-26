@@ -172,9 +172,9 @@ export default class SentryPlugin extends PluginBase {
             this.Sentry.setUser({ id: uuid });
         }
 
-        const scope = (this.Sentry as any).getCurrentScope ? this.Sentry.getCurrentScope() : undefined;
+        const scope = this.Sentry.getCurrentScope?.();
         if (scope) {
-            scope.addEventProcessor((event: any, hint: any) => {
+            scope.addEventProcessor((event, hint) => {
                 if (!this.isActive) {
                     return;
                 }
