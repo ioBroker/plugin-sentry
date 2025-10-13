@@ -1,7 +1,8 @@
 import { PluginBase } from '@iobroker/plugin-base';
 
-class SentryPlugin extends PluginBase {
+export default class SentryPlugin extends PluginBase {
     /** The Sentry instance */
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     Sentry: typeof import('@sentry/node');
     /** If plugin is enabled after all checks */
     reallyEnabled: boolean = false;
@@ -27,23 +28,17 @@ class SentryPlugin extends PluginBase {
         }
 
         // turn off if parent Package contains disableDataReporting flag
-        if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+        // @ts-expect-error fixed in js-controller
+        if (this.parentIoPackage?.common?.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on instance');
         }
 
         // for Adapter also check the host disableDataReporting flag
-        if (
-            this.pluginScope === this.SCOPES.ADAPTER &&
-            this.parentIoPackage &&
-            this.parentIoPackage.common &&
-            this.parentIoPackage.common.host
-        ) {
+        if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage?.common?.host) {
             let hostObj: ioBroker.HostObject;
             try {
-                hostObj = (await this.getObject(
-                    `system.host.${this.parentIoPackage.common.host}`
-                )) as ioBroker.HostObject;
+                hostObj = await this.getObject(`system.host.${this.parentIoPackage.common.host}`);
             } catch {
                 // ignore
             }
@@ -58,7 +53,7 @@ class SentryPlugin extends PluginBase {
             if (!hostObjName) {
                 const posPluginInNamespace = this.pluginNamespace.indexOf('.plugins.sentry');
                 if (posPluginInNamespace !== -1) {
-                    hostObjName = this.pluginNamespace.substr(0, posPluginInNamespace);
+                    hostObjName = this.pluginNamespace.substring(0, posPluginInNamespace);
                 }
             }
             if (hostObjName) {
@@ -73,7 +68,7 @@ class SentryPlugin extends PluginBase {
                 if (hostObj?.common?.disableDataReporting) {
                     this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                     throw new Error(
-                        'Sentry Plugin disabled for this process because data reporting is disabled on host'
+                        'Sentry Plugin disabled for this process because data reporting is disabled on host',
                     );
                 }
             }
@@ -81,26 +76,26 @@ class SentryPlugin extends PluginBase {
 
         let systemConfig: ioBroker.SystemConfigObject;
         try {
-            systemConfig = (await this.getObject('system.config')) as ioBroker.SystemConfigObject;
+            systemConfig = await this.getObject('system.config');
         } catch {
             // ignore
         }
-        if (!systemConfig || !systemConfig.common || systemConfig.common.diag === 'none') {
+        if (!systemConfig?.common || systemConfig.common.diag === 'none') {
             this.log.info(
-                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system'
+                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system',
             );
             throw new Error(
-                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system'
+                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system',
             );
         }
 
         let uuidObj: ioBroker.MetaObject;
         try {
-            uuidObj = (await this.getObject('system.meta.uuid')) as ioBroker.MetaObject;
+            uuidObj = await this.getObject('system.meta.uuid');
         } catch {
             // ignore
         }
-        const uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
+        const uuid = uuidObj?.native?.uuid || null;
 
         await this._registerSentry(pluginConfig, uuid);
     }
@@ -136,54 +131,55 @@ class SentryPlugin extends PluginBase {
         this.Sentry.init({
             release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
-            integrations: [new SentryIntegrations.Dedupe()]
+            integrations: [new SentryIntegrations.Dedupe()],
         });
-        this.Sentry.configureScope(scope => {
-            if (this.parentIoPackage && this.parentIoPackage.common) {
-                scope.setTag(
-                    'version',
-                    this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version
+
+        if (this.parentIoPackage?.common) {
+            this.Sentry.setTag(
+                'version',
+                this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version,
+            );
+            if (this.parentIoPackage.common.installedFrom) {
+                this.Sentry.setTag('installedFrom', this.parentIoPackage.common.installedFrom);
+            } else {
+                this.Sentry.setTag(
+                    'installedFrom',
+                    this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version,
                 );
-                if (this.parentIoPackage.common.installedFrom) {
-                    scope.setTag('installedFrom', this.parentIoPackage.common.installedFrom);
-                } else {
-                    scope.setTag(
-                        'installedFrom',
-                        this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version
-                    );
+            }
+            if (this.settings?.controllerVersion) {
+                this.Sentry.setTag('jsControllerVersion', this.settings.controllerVersion);
+            }
+            this.Sentry.setTag('osPlatform', process.platform);
+            this.Sentry.setTag('nodejsVersion', process.version);
+            try {
+                // best effort may fail in the build folder
+                this.Sentry.setTag('plugin-sentry', require('./package.json').version);
+            } catch {
+                // ignore
+            }
+            if (this.iobrokerConfig) {
+                if (this.iobrokerConfig.objects?.type) {
+                    this.Sentry.setTag('objectDBType', this.iobrokerConfig.objects.type);
                 }
-                if (this.settings && this.settings.controllerVersion) {
-                    scope.setTag('jsControllerVersion', this.settings.controllerVersion);
-                }
-                scope.setTag('osPlatform', process.platform);
-                scope.setTag('nodejsVersion', process.version);
-                try {
-                    scope.setTag('plugin-sentry', require('./package.json').version);
-                } catch {
-                    // ignore
-                }
-                if (this.iobrokerConfig) {
-                    if (this.iobrokerConfig.objects && this.iobrokerConfig.objects.type) {
-                        scope.setTag('objectDBType', this.iobrokerConfig.objects.type);
-                    }
-                    if (this.iobrokerConfig.states && this.iobrokerConfig.states.type) {
-                        scope.setTag('statesDBType', this.iobrokerConfig.states.type);
-                    }
+                if (this.iobrokerConfig.states?.type) {
+                    this.Sentry.setTag('statesDBType', this.iobrokerConfig.states.type);
                 }
             }
+        }
 
-            if (uuid) {
-                scope.setUser({
-                    id: uuid
-                });
-            }
+        if (uuid) {
+            this.Sentry.setUser({ id: uuid });
+        }
 
+        const scope = this.Sentry.getCurrentScope?.();
+        if (scope) {
             scope.addEventProcessor((event, hint) => {
                 if (!this.isActive) {
                     return;
                 }
                 // Try to filter out some events
-                if (event.exception && event.exception.values && event.exception.values[0]) {
+                if (event.exception?.values?.[0]) {
                     const eventData = event.exception.values[0];
                     // if the error type is one from the blacklist, we ignore this error
                     if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
@@ -193,12 +189,9 @@ class SentryPlugin extends PluginBase {
                     const originalException = hint.originalException as Record<string, any>;
 
                     // ignore EROFS, ENOSPC and such errors always
-                    const errorText =
-                        originalException && originalException.code
-                            ? originalException.code.toString()
-                            : originalException && originalException.message
-                              ? originalException.message.toString()
-                              : originalException;
+                    const errorText = originalException?.code
+                        ? originalException.code.toString()
+                        : originalException?.message?.toString() || originalException;
 
                     if (
                         typeof errorText === 'string' &&
@@ -214,40 +207,32 @@ class SentryPlugin extends PluginBase {
                         return null;
                     }
                     if (
-                        eventData.stacktrace &&
-                        eventData.stacktrace.frames &&
+                        eventData.stacktrace?.frames &&
                         Array.isArray(eventData.stacktrace.frames) &&
                         eventData.stacktrace.frames.length
                     ) {
-                        // if the last exception frame is from a nodejs internal method, we ignore this error
-                        if (
-                            eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename &&
-                            (eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
-                                'internal/'
-                            ) ||
-                                eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith(
-                                    'Module.'
-                                ))
-                        ) {
+                        // if the last exception frame is from a Node.js internal method, we ignore this error
+                        const fileName = eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename;
+                        if (fileName && (fileName.startsWith('internal/') || fileName.startsWith('Module.'))) {
                             return null;
                         }
                         // Check if any entry is whitelisted from pathWhitelist
                         const whitelisted = eventData.stacktrace.frames.find(frame => {
-                            if (frame.function && frame.function.startsWith('Module.')) {
+                            if (frame.function?.startsWith('Module.')) {
                                 return false;
                             }
-                            if (frame.filename && frame.filename.startsWith('internal/')) {
+                            if (frame.filename?.startsWith('internal/')) {
                                 return false;
                             }
                             if (
                                 frame.filename &&
-                                !sentryPathWhitelist.find(path => path && path.length && frame.filename.includes(path))
+                                !sentryPathWhitelist.find(path => path?.length && frame.filename.includes(path))
                             ) {
                                 return false;
                             }
                             if (
                                 frame.filename &&
-                                sentryPathBlacklist.find(path => path && path.length && frame.filename.includes(path))
+                                sentryPathBlacklist.find(path => path?.length && frame.filename.includes(path))
                             ) {
                                 return false;
                             }
@@ -261,16 +246,15 @@ class SentryPlugin extends PluginBase {
 
                 return event;
             });
-        });
+        }
     }
 
     /**
      * Return the Sentry object. This can be used to send own Messages or such
+     *
      * @returns Sentry object
      */
     getSentryObject(): typeof this.Sentry {
         return this.Sentry;
     }
 }
-
-export = SentryPlugin;

@@ -1,7 +1,0 @@
-{
-  "extends": ["@foxriver76/eslint-config"],
-  "rules": {
-    "unicorn/prefer-module": 0,
-    "@typescript-eslint/no-var-requires": 0
-  }
-}
