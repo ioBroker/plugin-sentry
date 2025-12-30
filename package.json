@@ -1,57 +1,57 @@
 {
-    "name": "@iobroker/plugin-sentry",
-    "version": "3.0.0",
-    "description": "Sentry module for plugins for js-controller and adapters",
-    "author": {
-        "name": "Ingo Fischer",
-        "email": "iobroker@fischer-ka.de"
-    },
-    "main": "build/index.js",
-    "types": "build/index.d.ts",
-    "files": [
-        "build/",
-        "LICENSE"
-    ],
-    "scripts": {
-        "prebuild": "rimraf ./build",
-        "build": "tsc -p tsconfig.json",
-        "release": "release-script",
-        "release-patch": "release-script patch --yes",
-        "release-minor": "release-script minor --yes",
-        "release-major": "release-script major --yes"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/ioBroker/plugin-sentry.git"
-    },
-    "keywords": [
-        "iobroker",
-        "adapter",
-        "plugins",
-        "Sentry"
-    ],
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/ioBroker/plugin-sentry/issues"
-    },
-    "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
-    "dependencies": {
-        "@iobroker/plugin-base": "^3.0.3",
-        "@sentry/integrations": "^7.114.0",
-        "@sentry/node": "^10.32.1",
-        "source-map-support": "^0.5.21"
-    },
-    "devDependencies": {
-        "@alcalzone/release-script": "^5.0.0",
-        "@alcalzone/release-script-plugin-license": "^4.0.0",
-        "@alcalzone/release-script-plugin-manual-review": "^4.0.0",
-        "@iobroker/db-objects-redis": "^7.1.0",
-        "@iobroker/db-states-redis": "^7.1.0",
-        "@iobroker/js-controller-common-db": "^7.1.0",
-        "@iobroker/eslint-config": "^2.2.0",
-        "@iobroker/types": "^7.1.0",
-        "@types/node": "^25.0.3",
-        "rimraf": "^6.1.2",
-        "typescript": "^5.9.3"
-    }
+  "name": "@iobroker/plugin-sentry",
+  "version": "3.0.1",
+  "description": "Sentry module for plugins for js-controller and adapters",
+  "author": {
+    "name": "Ingo Fischer",
+    "email": "iobroker@fischer-ka.de"
+  },
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "build/",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prebuild": "rimraf ./build",
+    "build": "tsc -p tsconfig.json",
+    "release": "release-script",
+    "release-patch": "release-script patch --yes",
+    "release-minor": "release-script minor --yes",
+    "release-major": "release-script major --yes"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ioBroker/plugin-sentry.git"
+  },
+  "keywords": [
+    "iobroker",
+    "adapter",
+    "plugins",
+    "Sentry"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ioBroker/plugin-sentry/issues"
+  },
+  "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
+  "dependencies": {
+    "@iobroker/plugin-base": "^3.0.3",
+    "@sentry/integrations": "^7.114.0",
+    "@sentry/node": "^10.32.1",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@alcalzone/release-script": "^5.0.0",
+    "@alcalzone/release-script-plugin-license": "^4.0.0",
+    "@alcalzone/release-script-plugin-manual-review": "^4.0.0",
+    "@iobroker/db-objects-redis": "^7.1.0",
+    "@iobroker/db-states-redis": "^7.1.0",
+    "@iobroker/js-controller-common-db": "^7.1.0",
+    "@iobroker/eslint-config": "^2.2.0",
+    "@iobroker/types": "^7.1.0",
+    "@types/node": "^25.0.3",
+    "rimraf": "^6.1.2",
+    "typescript": "^5.9.3"
+  }
 }
