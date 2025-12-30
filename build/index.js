@@ -1,7 +1,9 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const plugin_base_1 = require("@iobroker/plugin-base");
 class SentryPlugin extends plugin_base_1.PluginBase {
     /** The Sentry instance */
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     Sentry;
     /** If plugin is enabled after all checks */
     reallyEnabled = false;
@@ -23,23 +25,20 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             throw new Error('Sentry Plugin disabled for this process because CI system detected');
         }
         // turn off if parent Package contains disableDataReporting flag
-        if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+        // @ts-expect-error fixed in js-controller
+        if (this.parentIoPackage?.common?.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on instance');
         }
         // for Adapter also check the host disableDataReporting flag
-        if (this.pluginScope === this.SCOPES.ADAPTER &&
-            this.parentIoPackage &&
-            this.parentIoPackage.common &&
-            this.parentIoPackage.common.host) {
+        if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage?.common?.host) {
             let hostObj;
             try {
-                hostObj = (await this.getObject(`system.host.${this.parentIoPackage.common.host}`));
+                hostObj = await this.getObject(`system.host.${this.parentIoPackage.common.host}`);
             }
             catch {
                 // ignore
             }
-            // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
             if (hostObj?.common?.disableDataReporting) {
                 this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                 throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
@@ -50,7 +49,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             if (!hostObjName) {
                 const posPluginInNamespace = this.pluginNamespace.indexOf('.plugins.sentry');
                 if (posPluginInNamespace !== -1) {
-                    hostObjName = this.pluginNamespace.substr(0, posPluginInNamespace);
+                    hostObjName = this.pluginNamespace.substring(0, posPluginInNamespace);
                 }
             }
             if (hostObjName) {
@@ -61,7 +60,6 @@ class SentryPlugin extends plugin_base_1.PluginBase {
                 catch {
                     // ignore
                 }
-                // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
                 if (hostObj?.common?.disableDataReporting) {
                     this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                     throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
@@ -70,29 +68,29 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         }
         let systemConfig;
         try {
-            systemConfig = (await this.getObject('system.config'));
+            systemConfig = await this.getObject('system.config');
         }
         catch {
             // ignore
         }
-        if (!systemConfig || !systemConfig.common || systemConfig.common.diag === 'none') {
+        if (!systemConfig?.common || systemConfig.common.diag === 'none') {
             this.log.info('Sentry Plugin disabled for this process because sending of statistic data is disabled for the system');
             throw new Error('Sentry Plugin disabled for this process because sending of statistic data is disabled for the system');
         }
         let uuidObj;
         try {
-            uuidObj = (await this.getObject('system.meta.uuid'));
+            uuidObj = await this.getObject('system.meta.uuid');
         }
         catch {
             // ignore
         }
-        const uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
+        const uuid = uuidObj?.native?.uuid || null;
         await this._registerSentry(pluginConfig, uuid);
     }
     async _registerSentry(pluginConfig, uuid) {
         this.reallyEnabled = true;
         // Require needed tooling
-        this.Sentry = await Promise.resolve().then(() => require('@sentry/node'));
+        this.Sentry = await import('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
         // locations in error messages
@@ -118,7 +116,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         this.Sentry.init({
             release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
-            integrations: [new SentryIntegrations.Dedupe()]
+            integrations: [new SentryIntegrations.Dedupe()],
         });
         const scope = this.Sentry.getCurrentScope();
         if (this.parentIoPackage && this.parentIoPackage.common) {
@@ -141,74 +139,75 @@ class SentryPlugin extends plugin_base_1.PluginBase {
                 // ignore
             }
             if (this.iobrokerConfig) {
-                if (this.iobrokerConfig.objects && this.iobrokerConfig.objects.type) {
-                    scope.setTag('objectDBType', this.iobrokerConfig.objects.type);
+                if (this.iobrokerConfig.objects?.type) {
+                    this.Sentry.setTag('objectDBType', this.iobrokerConfig.objects.type);
                 }
-                if (this.iobrokerConfig.states && this.iobrokerConfig.states.type) {
-                    scope.setTag('statesDBType', this.iobrokerConfig.states.type);
+                if (this.iobrokerConfig.states?.type) {
+                    this.Sentry.setTag('statesDBType', this.iobrokerConfig.states.type);
                 }
             }
         }
         if (uuid) {
-            scope.setUser({
-                id: uuid
-            });
+            this.Sentry.setUser({ id: uuid });
         }
-        scope.addEventProcessor((event, hint) => {
-            if (!this.isActive) {
-                return;
-            }
-            // Try to filter out some events
-            if (event.exception && event.exception.values && event.exception.values[0]) {
-                const eventData = event.exception.values[0];
-                // if the error type is one from the blacklist, we ignore this error
-                if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
-                    return null;
+        const scope = this.Sentry.getCurrentScope?.();
+        if (scope) {
+            scope.addEventProcessor((event, hint) => {
+                if (!this.isActive) {
+                    return;
                 }
-                const originalException = hint.originalException;
-                // ignore EROFS, ENOSPC and such errors always
-                const errorText = originalException && originalException.code
-                    ? originalException.code.toString()
-                    : originalException && originalException.message
-                        ? originalException.message.toString()
-                        : originalException;
-                if (typeof errorText === 'string' &&
-                    (errorText.includes('EROFS') || // Read only FS
-                        errorText.includes('ENOSPC') || // No disk space available
-                        errorText.includes('ENOMEM') || // No memory (RAM) available
-                        errorText.includes('EIO') || // I/O error
-                        errorText.includes('ENXIO') || // I/O error
-                        errorText.includes('EMFILE') || // too many open files
-                        errorText.includes('ENFILE') || // file table overflow
-                        errorText.includes('EBADF')) // Bad file descriptor
-                ) {
-                    return null;
-                }
-                if (eventData.stacktrace &&
-                    eventData.stacktrace.frames &&
-                    Array.isArray(eventData.stacktrace.frames) &&
-                    eventData.stacktrace.frames.length) {
-                    // if the last exception frame is from a nodejs internal method, we ignore this error
-                    if (eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename &&
-                        (eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith('internal/') ||
-                            eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename.startsWith('Module.'))) {
+                // Try to filter out some events
+                if (event.exception?.values?.[0]) {
+                    const eventData = event.exception.values[0];
+                    // if the error type is one from the blacklist, we ignore this error
+                    if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
                         return null;
                     }
-                    // Check if any entry is whitelisted from pathWhitelist
-                    const whitelisted = eventData.stacktrace.frames.find(frame => {
-                        if (frame.function && frame.function.startsWith('Module.')) {
-                            return false;
+                    const originalException = hint.originalException;
+                    // ignore EROFS, ENOSPC and such errors always
+                    const errorText = originalException?.code
+                        ? originalException.code.toString()
+                        : originalException?.message?.toString() || originalException;
+                    if (typeof errorText === 'string' &&
+                        (errorText.includes('EROFS') || // Read only FS
+                            errorText.includes('ENOSPC') || // No disk space available
+                            errorText.includes('ENOMEM') || // No memory (RAM) available
+                            errorText.includes('EIO') || // I/O error
+                            errorText.includes('ENXIO') || // I/O error
+                            errorText.includes('EMFILE') || // too many open files
+                            errorText.includes('ENFILE') || // file table overflow
+                            errorText.includes('EBADF')) // Bad file descriptor
+                    ) {
+                        return null;
+                    }
+                    if (eventData.stacktrace?.frames &&
+                        Array.isArray(eventData.stacktrace.frames) &&
+                        eventData.stacktrace.frames.length) {
+                        // if the last exception frame is from a Node.js internal method, we ignore this error
+                        const fileName = eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename;
+                        if (fileName && (fileName.startsWith('internal/') || fileName.startsWith('Module.'))) {
+                            return null;
                         }
-                        if (frame.filename && frame.filename.startsWith('internal/')) {
-                            return false;
-                        }
-                        if (frame.filename &&
-                            !sentryPathWhitelist.find(path => path && path.length && frame.filename.includes(path))) {
-                            return false;
-                        }
-                        if (frame.filename &&
-                            sentryPathBlacklist.find(path => path && path.length && frame.filename.includes(path))) {
-                            return false;
+                        // Check if any entry is whitelisted from pathWhitelist
+                        const whitelisted = eventData.stacktrace.frames.find(frame => {
+                            if (frame.function?.startsWith('Module.')) {
+                                return false;
+                            }
+                            if (frame.filename?.startsWith('internal/')) {
+                                return false;
+                            }
+                            if (frame.filename &&
+                                !sentryPathWhitelist.find(path => path?.length && frame.filename.includes(path))) {
+                                return false;
+                            }
+                            if (frame.filename &&
+                                sentryPathBlacklist.find(path => path?.length && frame.filename.includes(path))) {
+                                return false;
+                            }
+                            return true;
+                        });
+                        if (!whitelisted) {
+                            return null;
                         }
                         return true;
                     });
@@ -216,16 +215,17 @@ class SentryPlugin extends plugin_base_1.PluginBase {
                         return null;
                     }
                 }
-            }
-            return event;
-        });
+                return event;
+            });
+        }
     }
     /**
      * Return the Sentry object. This can be used to send own Messages or such
+     *
      * @returns Sentry object
      */
     getSentryObject() {
         return this.Sentry;
     }
 }
-module.exports = SentryPlugin;
+exports.default = SentryPlugin;

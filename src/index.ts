@@ -1,7 +1,8 @@
 import { PluginBase } from '@iobroker/plugin-base';
 
-class SentryPlugin extends PluginBase {
+export default class SentryPlugin extends PluginBase {
     /** The Sentry instance */
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     Sentry: typeof import('@sentry/node');
     /** If plugin is enabled after all checks */
     reallyEnabled: boolean = false;
@@ -27,28 +28,21 @@ class SentryPlugin extends PluginBase {
         }
 
         // turn off if parent Package contains disableDataReporting flag
-        if (this.parentIoPackage && this.parentIoPackage.common && this.parentIoPackage.common.disableDataReporting) {
+        // @ts-expect-error fixed in js-controller
+        if (this.parentIoPackage?.common?.disableDataReporting) {
             this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on instance');
             throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on instance');
         }
 
         // for Adapter also check the host disableDataReporting flag
-        if (
-            this.pluginScope === this.SCOPES.ADAPTER &&
-            this.parentIoPackage &&
-            this.parentIoPackage.common &&
-            this.parentIoPackage.common.host
-        ) {
+        if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage?.common?.host) {
             let hostObj: ioBroker.HostObject;
             try {
-                hostObj = (await this.getObject(
-                    `system.host.${this.parentIoPackage.common.host}`
-                )) as ioBroker.HostObject;
+                hostObj = await this.getObject(`system.host.${this.parentIoPackage.common.host}`);
             } catch {
                 // ignore
             }
 
-            // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
             if (hostObj?.common?.disableDataReporting) {
                 this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                 throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
@@ -58,7 +52,7 @@ class SentryPlugin extends PluginBase {
             if (!hostObjName) {
                 const posPluginInNamespace = this.pluginNamespace.indexOf('.plugins.sentry');
                 if (posPluginInNamespace !== -1) {
-                    hostObjName = this.pluginNamespace.substr(0, posPluginInNamespace);
+                    hostObjName = this.pluginNamespace.substring(0, posPluginInNamespace);
                 }
             }
             if (hostObjName) {
@@ -69,11 +63,10 @@ class SentryPlugin extends PluginBase {
                     // ignore
                 }
 
-                // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
                 if (hostObj?.common?.disableDataReporting) {
                     this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                     throw new Error(
-                        'Sentry Plugin disabled for this process because data reporting is disabled on host'
+                        'Sentry Plugin disabled for this process because data reporting is disabled on host',
                     );
                 }
             }
@@ -81,26 +74,26 @@ class SentryPlugin extends PluginBase {
 
         let systemConfig: ioBroker.SystemConfigObject;
         try {
-            systemConfig = (await this.getObject('system.config')) as ioBroker.SystemConfigObject;
+            systemConfig = await this.getObject('system.config');
         } catch {
             // ignore
         }
-        if (!systemConfig || !systemConfig.common || systemConfig.common.diag === 'none') {
+        if (!systemConfig?.common || systemConfig.common.diag === 'none') {
             this.log.info(
-                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system'
+                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system',
             );
             throw new Error(
-                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system'
+                'Sentry Plugin disabled for this process because sending of statistic data is disabled for the system',
             );
         }
 
         let uuidObj: ioBroker.MetaObject;
         try {
-            uuidObj = (await this.getObject('system.meta.uuid')) as ioBroker.MetaObject;
+            uuidObj = await this.getObject('system.meta.uuid');
         } catch {
             // ignore
         }
-        const uuid = uuidObj && uuidObj.native ? uuidObj.native.uuid : null;
+        const uuid = uuidObj?.native?.uuid || null;
 
         await this._registerSentry(pluginConfig, uuid);
     }
@@ -136,7 +129,7 @@ class SentryPlugin extends PluginBase {
         this.Sentry.init({
             release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
-            integrations: [new SentryIntegrations.Dedupe()]
+            integrations: [new SentryIntegrations.Dedupe()],
         });
         const scope = this.Sentry.getCurrentScope();
         if (this.parentIoPackage && this.parentIoPackage.common) {
@@ -265,6 +258,7 @@ class SentryPlugin extends PluginBase {
 
     /**
      * Return the Sentry object. This can be used to send own Messages or such
+     *
      * @returns Sentry object
      */
     getSentryObject(): typeof this.Sentry {
