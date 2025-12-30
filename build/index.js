@@ -39,7 +39,6 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             catch {
                 // ignore
             }
-            // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
             if (hostObj?.common?.disableDataReporting) {
                 this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                 throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');
@@ -61,7 +60,6 @@ class SentryPlugin extends plugin_base_1.PluginBase {
                 catch {
                     // ignore
                 }
-                // @ts-expect-error comes with https://github.com/ioBroker/ioBroker.js-controller/pull/2738
                 if (hostObj?.common?.disableDataReporting) {
                     this.log.info('Sentry Plugin disabled for this process because data reporting is disabled on host');
                     throw new Error('Sentry Plugin disabled for this process because data reporting is disabled on host');

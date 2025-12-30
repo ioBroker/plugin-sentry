@@ -165,6 +165,9 @@ This should cause the adapter to crash and the exception to be shown in the sent
 ### **WORK IN PROGRESS**
 - (@GermanBluefox) Updated packages to latest versions
 
+### 3.0.0 (2025-10-13)
+- (@GermanBluefox) Updated packages to latest versions
+
 ### 2.0.4 (2024-06-01)
 - (foxriver76) work with plugin base v2
 - (foxriver76) ported to TypeScript to provide improved type support
