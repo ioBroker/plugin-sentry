@@ -162,6 +162,9 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (@GermanBluefox) Updated packages to latest versions
+
 ### 3.0.0 (2025-10-13)
 - (@GermanBluefox) Updated packages to latest versions
 
