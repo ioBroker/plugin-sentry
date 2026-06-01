@@ -52,7 +52,7 @@
     "@iobroker/db-objects-redis": "^7.1.1",
     "@iobroker/db-states-redis": "^7.1.2",
     "@iobroker/eslint-config": "^2.3.4",
-    "@iobroker/js-controller-common-db": "^7.1.1",
+    "@iobroker/js-controller-common-db": "^7.1.2",
     "@iobroker/types": "^7.1.2",
     "@types/node": "^25.9.1",
     "baseline-browser-mapping": "^2.10.33",
