@@ -224,8 +224,8 @@ This should cause the adapter to crash and the exception to be shown in the sent
 - (Apollon77) update plugin-base
 
 ### 1.0.0 (2020-04-26)
-- (Apollon77) add pathBlacklist config option
-- (Apollon77) declare as 1.0.0 for js-controller 3.0 release
+- (Apollon77) added pathBlacklist config option
+- (Apollon77) declared as 1.0.0 for js-controller 3.0 release
 
 ### 0.1.2 (2020-03-31)
 - (Apollon77) fix filtering logic
