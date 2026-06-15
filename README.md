@@ -162,8 +162,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 3.1.0 (2026-06-15)
 - (@Apollon77) Disable Sentry session reporting
 - (@GermanBluefox) Updated packages to the latest versions
 
