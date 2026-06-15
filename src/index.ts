@@ -1,5 +1,4 @@
 import { PluginBase } from '@iobroker/plugin-base';
-import SentryIntegrations from '@sentry/integrations';
 
 export default class SentryPlugin extends PluginBase {
     /** The Sentry instance */
