@@ -2,7 +2,7 @@ import { PluginBase } from '@iobroker/plugin-base';
 export default class SentryPlugin extends PluginBase {
     /** The Sentry instance */
     Sentry: typeof import('@sentry/node');
-    /** If plugin is enabled after all checks */
+    /** If the plugin is enabled after all checks */
     reallyEnabled: boolean;
     /**
      * Register and initialize Sentry

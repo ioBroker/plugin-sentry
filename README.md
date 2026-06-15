@@ -90,14 +90,14 @@ To obtain a Sentry account as a developer, you have a couple of options:
 The basic process to use the ioBroker Sentry system is as follows:
 
 1. Contact @Apollon77 by creating an issue in this project for each adapter you require access to. Make sure to include the link to the adapter repository.
-1. We will conduct an enhanced adapter review, specifically focusing on error handling to ensure that adapters do not flood the Sentry system.
-1. We will need your email address to invite you to the Sentry instance, and you will need a Two-Factor-Authentication app (e.g., Google Authenticator) to secure your account.
-1. We will create the project on Sentry and assign it to you.
-1. We will provide you with the necessary Sentry DSN for your configuration.
-1. You must add the configuration to the io-package.json file and include a short information section in your README. Please add the following notice to the top of your README:  
+2. We will conduct an enhanced adapter review, specifically focusing on error handling to ensure that adapters do not flood the Sentry system.
+3. We will need your email address to invite you to the Sentry instance, and you will need a Two-Factor-Authentication app (e.g., Google Authenticator) to secure your account.
+4. We will create the project on Sentry and assign it to you.
+5. We will provide you with the necessary Sentry DSN for your configuration.
+6. You must add the configuration to the io-package.json file and include a short information section in your README. Please add the following notice to the top of your README:  
 `**This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and instructions on disabling error reporting, please refer to the [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Use of Sentry reporting starts with js-controller 3.0.`
-1. We can discuss the details separately if you wish to transfer your own errors or other events.
-1. With everything finally set up, you can test and release your adapter.
+7. We can discuss the details separately if you wish to transfer your own errors or other events.
+8. With everything finally set up, you can test and release your adapter.
 
 Please follow these steps for smooth integration with the ioBroker Sentry system.
 
@@ -162,11 +162,14 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (@GermanBluefox) Updated packages to the latest versions
+
 ### 3.0.4 (2025-12-30)
-- (@GermanBluefox) Updated packages to latest versions
+- (@GermanBluefox) Updated packages to the latest versions
 
 ### 3.0.0 (2025-10-13)
-- (@GermanBluefox) Updated packages to latest versions
+- (@GermanBluefox) Updated packages to the latest versions
 
 ### 2.0.4 (2024-06-01)
 - (foxriver76) work with plugin base v2

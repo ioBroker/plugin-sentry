@@ -5,7 +5,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
     /** The Sentry instance */
     // eslint-disable-next-line @typescript-eslint/consistent-type-imports
     Sentry;
-    /** If plugin is enabled after all checks */
+    /** If the plugin is enabled after all checks */
     reallyEnabled = false;
     /**
      * Register and initialize Sentry
@@ -89,7 +89,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
     }
     async _registerSentry(pluginConfig, uuid) {
         this.reallyEnabled = true;
-        // Require needed tooling
+        // Require necessary tooling
         this.Sentry = await import('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
@@ -151,69 +151,67 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             this.Sentry.setUser({ id: uuid });
         }
         const scope = this.Sentry.getCurrentScope?.();
-        if (scope) {
-            scope.addEventProcessor((event, hint) => {
-                if (!this.isActive) {
-                    return;
+        scope?.addEventProcessor((event, hint) => {
+            if (!this.isActive) {
+                return null;
+            }
+            // Try to filter out some events
+            if (event.exception?.values?.[0]) {
+                const eventData = event.exception.values[0];
+                // if the error type is one from the blacklist, we ignore this error
+                if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
+                    return null;
                 }
-                // Try to filter out some events
-                if (event.exception?.values?.[0]) {
-                    const eventData = event.exception.values[0];
-                    // if the error type is one from the blacklist, we ignore this error
-                    if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
+                const originalException = hint.originalException;
+                // ignore EROFS, ENOSPC and such errors always
+                const errorText = originalException?.code
+                    ? originalException.code.toString()
+                    : originalException?.message?.toString() || originalException;
+                if (typeof errorText === 'string' &&
+                    (errorText.includes('EROFS') || // Read only FS
+                        errorText.includes('ENOSPC') || // No disk space available
+                        errorText.includes('ENOMEM') || // No memory (RAM) available
+                        errorText.includes('EIO') || // I/O error
+                        errorText.includes('ENXIO') || // I/O error
+                        errorText.includes('EMFILE') || // too many open files
+                        errorText.includes('ENFILE') || // file table overflow
+                        errorText.includes('EBADF')) // Bad file descriptor
+                ) {
+                    return null;
+                }
+                if (eventData.stacktrace?.frames &&
+                    Array.isArray(eventData.stacktrace.frames) &&
+                    eventData.stacktrace.frames.length) {
+                    // if the last exception frame is from a Node.js internal method, we ignore this error
+                    const fileName = eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename;
+                    if (fileName && (fileName.startsWith('internal/') || fileName.startsWith('Module.'))) {
                         return null;
                     }
-                    const originalException = hint.originalException;
-                    // ignore EROFS, ENOSPC and such errors always
-                    const errorText = originalException?.code
-                        ? originalException.code.toString()
-                        : originalException?.message?.toString() || originalException;
-                    if (typeof errorText === 'string' &&
-                        (errorText.includes('EROFS') || // Read only FS
-                            errorText.includes('ENOSPC') || // No disk space available
-                            errorText.includes('ENOMEM') || // No memory (RAM) available
-                            errorText.includes('EIO') || // I/O error
-                            errorText.includes('ENXIO') || // I/O error
-                            errorText.includes('EMFILE') || // too many open files
-                            errorText.includes('ENFILE') || // file table overflow
-                            errorText.includes('EBADF')) // Bad file descriptor
-                    ) {
+                    // Check if any entry is whitelisted from pathWhitelist
+                    const whitelisted = eventData.stacktrace.frames.find(frame => {
+                        if (frame.function?.startsWith('Module.')) {
+                            return false;
+                        }
+                        if (frame.filename?.startsWith('internal/')) {
+                            return false;
+                        }
+                        if (frame.filename &&
+                            !sentryPathWhitelist.find(path => path?.length && frame.filename.includes(path))) {
+                            return false;
+                        }
+                        if (frame.filename &&
+                            sentryPathBlacklist.find(path => path?.length && frame.filename.includes(path))) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (!whitelisted) {
                         return null;
                     }
-                    if (eventData.stacktrace?.frames &&
-                        Array.isArray(eventData.stacktrace.frames) &&
-                        eventData.stacktrace.frames.length) {
-                        // if the last exception frame is from a Node.js internal method, we ignore this error
-                        const fileName = eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename;
-                        if (fileName && (fileName.startsWith('internal/') || fileName.startsWith('Module.'))) {
-                            return null;
-                        }
-                        // Check if any entry is whitelisted from pathWhitelist
-                        const whitelisted = eventData.stacktrace.frames.find(frame => {
-                            if (frame.function?.startsWith('Module.')) {
-                                return false;
-                            }
-                            if (frame.filename?.startsWith('internal/')) {
-                                return false;
-                            }
-                            if (frame.filename &&
-                                !sentryPathWhitelist.find(path => path?.length && frame.filename.includes(path))) {
-                                return false;
-                            }
-                            if (frame.filename &&
-                                sentryPathBlacklist.find(path => path?.length && frame.filename.includes(path))) {
-                                return false;
-                            }
-                            return true;
-                        });
-                        if (!whitelisted) {
-                            return null;
-                        }
-                    }
                 }
-                return event;
-            });
-        }
+            }
+            return event;
+        });
     }
     /**
      * Return the Sentry object. This can be used to send own Messages or such
