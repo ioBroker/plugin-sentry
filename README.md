@@ -174,7 +174,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 - (@GermanBluefox) Updated packages to the latest versions
 
 ### 2.0.4 (2024-06-01)
-- (foxriver76) work with plugin base v2
+- (foxriver76) works with plugin base v2
 - (foxriver76) ported to TypeScript to provide improved type support
 
 **Breaking Changes**: Due to the port to Plugin Base v2, `init` now returns a promise instead of accepting a callback parameter, also the export has changed to a named export
