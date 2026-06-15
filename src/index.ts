@@ -1,4 +1,5 @@
 import { PluginBase } from '@iobroker/plugin-base';
+import SentryIntegrations from '@sentry/integrations';
 
 export default class SentryPlugin extends PluginBase {
     /** The Sentry instance */
@@ -129,7 +130,12 @@ export default class SentryPlugin extends PluginBase {
         this.Sentry.init({
             release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
-            integrations: [new SentryIntegrations.Dedupe()],
+            integrations: [
+                new SentryIntegrations.Dedupe(),
+                SentryIntegrations.httpIntegration({
+                    trackIncomingRequestsAsSessions: false, // default: true
+                }),
+            ],
         });
 
         if (this.parentIoPackage?.common) {
