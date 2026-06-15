@@ -116,7 +116,12 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         this.Sentry.init({
             release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
-            integrations: [new SentryIntegrations.Dedupe()],
+            integrations: [
+                new SentryIntegrations.Dedupe(),
+                SentryIntegrations.httpIntegration({
+                    trackIncomingRequestsAsSessions: false, // default: true
+                }),
+            ],
         });
         if (this.parentIoPackage?.common) {
             this.Sentry.setTag('version', this.parentIoPackage.common.installedVersion || this.parentIoPackage.common.version);
