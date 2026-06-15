@@ -3,8 +3,8 @@ import { PluginBase } from '@iobroker/plugin-base';
 export default class SentryPlugin extends PluginBase {
     /** The Sentry instance */
     // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-    Sentry: typeof import('@sentry/node');
-    /** If plugin is enabled after all checks */
+    Sentry!: typeof import('@sentry/node');
+    /** If the plugin is enabled after all checks */
     reallyEnabled: boolean = false;
 
     /**
@@ -36,7 +36,7 @@ export default class SentryPlugin extends PluginBase {
 
         // for Adapter also check the host disableDataReporting flag
         if (this.pluginScope === this.SCOPES.ADAPTER && this.parentIoPackage?.common?.host) {
-            let hostObj: ioBroker.HostObject;
+            let hostObj: ioBroker.HostObject | undefined | null;
             try {
                 hostObj = await this.getObject(`system.host.${this.parentIoPackage.common.host}`);
             } catch {
@@ -56,7 +56,7 @@ export default class SentryPlugin extends PluginBase {
                 }
             }
             if (hostObjName) {
-                let hostObj: ioBroker.HostObject;
+                let hostObj: ioBroker.HostObject | undefined | null;
                 try {
                     hostObj = (await this.getObject(hostObjName)) as ioBroker.HostObject;
                 } catch {
@@ -72,7 +72,7 @@ export default class SentryPlugin extends PluginBase {
             }
         }
 
-        let systemConfig: ioBroker.SystemConfigObject;
+        let systemConfig: ioBroker.SystemConfigObject | undefined | null;
         try {
             systemConfig = await this.getObject('system.config');
         } catch {
@@ -87,7 +87,7 @@ export default class SentryPlugin extends PluginBase {
             );
         }
 
-        let uuidObj: ioBroker.MetaObject;
+        let uuidObj: ioBroker.MetaObject | undefined | null;
         try {
             uuidObj = await this.getObject('system.meta.uuid');
         } catch {
@@ -100,7 +100,7 @@ export default class SentryPlugin extends PluginBase {
 
     private async _registerSentry(pluginConfig: Record<string, any>, uuid: string): Promise<void> {
         this.reallyEnabled = true;
-        // Require needed tooling
+        // Require necessary tooling
         this.Sentry = await import('@sentry/node');
         const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
@@ -176,80 +176,78 @@ export default class SentryPlugin extends PluginBase {
         }
 
         const scope = this.Sentry.getCurrentScope?.();
-        if (scope) {
-            scope.addEventProcessor((event, hint) => {
-                if (!this.isActive) {
-                    return;
-                }
-                // Try to filter out some events
-                if (event.exception?.values?.[0]) {
-                    const eventData = event.exception.values[0];
-                    // if the error type is one from the blacklist, we ignore this error
-                    if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
-                        return null;
-                    }
-
-                    const originalException = hint.originalException as Record<string, any>;
-
-                    // ignore EROFS, ENOSPC and such errors always
-                    const errorText = originalException?.code
-                        ? originalException.code.toString()
-                        : originalException?.message?.toString() || originalException;
-
-                    if (
-                        typeof errorText === 'string' &&
-                        (errorText.includes('EROFS') || // Read only FS
-                            errorText.includes('ENOSPC') || // No disk space available
-                            errorText.includes('ENOMEM') || // No memory (RAM) available
-                            errorText.includes('EIO') || // I/O error
-                            errorText.includes('ENXIO') || // I/O error
-                            errorText.includes('EMFILE') || // too many open files
-                            errorText.includes('ENFILE') || // file table overflow
-                            errorText.includes('EBADF')) // Bad file descriptor
-                    ) {
-                        return null;
-                    }
-                    if (
-                        eventData.stacktrace?.frames &&
-                        Array.isArray(eventData.stacktrace.frames) &&
-                        eventData.stacktrace.frames.length
-                    ) {
-                        // if the last exception frame is from a Node.js internal method, we ignore this error
-                        const fileName = eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename;
-                        if (fileName && (fileName.startsWith('internal/') || fileName.startsWith('Module.'))) {
-                            return null;
-                        }
-                        // Check if any entry is whitelisted from pathWhitelist
-                        const whitelisted = eventData.stacktrace.frames.find(frame => {
-                            if (frame.function?.startsWith('Module.')) {
-                                return false;
-                            }
-                            if (frame.filename?.startsWith('internal/')) {
-                                return false;
-                            }
-                            if (
-                                frame.filename &&
-                                !sentryPathWhitelist.find(path => path?.length && frame.filename.includes(path))
-                            ) {
-                                return false;
-                            }
-                            if (
-                                frame.filename &&
-                                sentryPathBlacklist.find(path => path?.length && frame.filename.includes(path))
-                            ) {
-                                return false;
-                            }
-                            return true;
-                        });
-                        if (!whitelisted) {
-                            return null;
-                        }
-                    }
+        scope?.addEventProcessor((event, hint) => {
+            if (!this.isActive) {
+                return null;
+            }
+            // Try to filter out some events
+            if (event.exception?.values?.[0]) {
+                const eventData = event.exception.values[0];
+                // if the error type is one from the blacklist, we ignore this error
+                if (eventData.type && sentryErrorBlacklist.includes(eventData.type)) {
+                    return null;
                 }
 
-                return event;
-            });
-        }
+                const originalException = hint.originalException as Record<string, any>;
+
+                // ignore EROFS, ENOSPC and such errors always
+                const errorText = originalException?.code
+                    ? originalException.code.toString()
+                    : originalException?.message?.toString() || originalException;
+
+                if (
+                    typeof errorText === 'string' &&
+                    (errorText.includes('EROFS') || // Read only FS
+                        errorText.includes('ENOSPC') || // No disk space available
+                        errorText.includes('ENOMEM') || // No memory (RAM) available
+                        errorText.includes('EIO') || // I/O error
+                        errorText.includes('ENXIO') || // I/O error
+                        errorText.includes('EMFILE') || // too many open files
+                        errorText.includes('ENFILE') || // file table overflow
+                        errorText.includes('EBADF')) // Bad file descriptor
+                ) {
+                    return null;
+                }
+                if (
+                    eventData.stacktrace?.frames &&
+                    Array.isArray(eventData.stacktrace.frames) &&
+                    eventData.stacktrace.frames.length
+                ) {
+                    // if the last exception frame is from a Node.js internal method, we ignore this error
+                    const fileName = eventData.stacktrace.frames[eventData.stacktrace.frames.length - 1].filename;
+                    if (fileName && (fileName.startsWith('internal/') || fileName.startsWith('Module.'))) {
+                        return null;
+                    }
+                    // Check if any entry is whitelisted from pathWhitelist
+                    const whitelisted = eventData.stacktrace.frames.find(frame => {
+                        if (frame.function?.startsWith('Module.')) {
+                            return false;
+                        }
+                        if (frame.filename?.startsWith('internal/')) {
+                            return false;
+                        }
+                        if (
+                            frame.filename &&
+                            !sentryPathWhitelist.find(path => path?.length && frame.filename!.includes(path))
+                        ) {
+                            return false;
+                        }
+                        if (
+                            frame.filename &&
+                            sentryPathBlacklist.find(path => path?.length && frame.filename!.includes(path))
+                        ) {
+                            return false;
+                        }
+                        return true;
+                    });
+                    if (!whitelisted) {
+                        return null;
+                    }
+                }
+            }
+
+            return event;
+        });
     }
 
     /**

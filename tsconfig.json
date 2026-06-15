@@ -4,6 +4,7 @@
     "moduleResolution": "node16",
     "module": "Node16",
     "outDir": "./build/",
+    "rootDir": "./src/",
     "allowJs": false,
     "checkJs": false,
     "noEmit": false,
