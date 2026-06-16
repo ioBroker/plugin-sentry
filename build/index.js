@@ -118,7 +118,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             dsn: pluginConfig.dsn,
             integrations: [
                 new SentryIntegrations.Dedupe(),
-                SentryIntegrations.httpIntegration({
+                this.Sentry.httpIntegration({
                     trackIncomingRequestsAsSessions: false, // default: true
                 }),
             ],

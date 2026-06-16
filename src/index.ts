@@ -131,7 +131,7 @@ export default class SentryPlugin extends PluginBase {
             dsn: pluginConfig.dsn,
             integrations: [
                 new SentryIntegrations.Dedupe(),
-                SentryIntegrations.httpIntegration({
+                this.Sentry.httpIntegration({
                     trackIncomingRequestsAsSessions: false, // default: true
                 }),
             ],
