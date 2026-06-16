@@ -10,7 +10,7 @@ This information helps analyze and debug the problems effectively, leading to im
 Providing consent to iobroker GmbH to collect diagnostic data, results in the inclusion of an anonymous installation ID **without** any additional information about you, such as email or name, is included.
 This enables Sentry to group errors and gain insight into the number of unique users affected by a particular error. It's important to note that no IP addresses are present within crash reports, with all data deleted within 90 days at the latest.
 
-All of these helps developers to provide an error-free smart home system that never crashes. :-)
+All of this help developers deliver a stable, error-free smart home system that never crashes. :-)
 
 ## Disabling error reporting
 If you wish to deactivate the error reporting feature, you have a couple of options:
@@ -20,7 +20,7 @@ If you wish to deactivate the error reporting feature, you have a couple of opti
 `iobroker plugin disable sentry`.
     - To disable Sentry for a specific adapter/instance, use:  
     `iobroker plugin disable sentry --instance adaptername.nr`
-1. Adjust the corresponding state values:
+2. Adjust the corresponding state values:
 
     - For js-controller hosts, set the state `system.host.NAME.plugins.sentry.enabled` to false.
     - Set the state `system.adapter.NAME.INSTANCE.plugins.sentry.enabled` to false for adapter instances.
