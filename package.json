@@ -54,7 +54,7 @@
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/js-controller-common-db": "^7.2.2",
     "@iobroker/types": "^7.2.2",
-    "@types/node": "^20.19.43",
+    "@types/node": "^26.0.1",
     "baseline-browser-mapping": "^2.10.40",
     "rimraf": "^6.1.3",
     "typescript": "^6.0.3"
