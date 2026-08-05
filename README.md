@@ -150,7 +150,7 @@ The easiest way is to add an invalid call to your code, e.g.,
 
 `huhu();`
 
-or 
+or
 
 `setTimeout(huhu, 10000);`
 
@@ -162,8 +162,12 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
+### **WORK IN PROGRESS**
+- (@GermanBluefox) Removed the legacy `@sentry/integrations` dependency and use `dedupeIntegration` from `@sentry/node` instead
+- (@GermanBluefox) Fixed an `ExperimentalWarning` about `localStorage` written to stderr on Node.js 26, caused by the transitive `localforage` dependency
+
 ### 3.1.2 (2026-06-16)
-- (@Apollon77) Fix Sentry session reporting disabling
+- (@Apollon77) Fixed Sentry session reporting disabling
 
 ### 3.1.0 (2026-06-15)
 - (@Apollon77) Disable Sentry session reporting
