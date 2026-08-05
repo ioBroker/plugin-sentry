@@ -91,7 +91,6 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         this.reallyEnabled = true;
         // Require necessary tooling
         this.Sentry = await import('@sentry/node');
-        const SentryIntegrations = require('@sentry/integrations');
         // By installing source map support, we get the original source
         // locations in error messages
         require('source-map-support').install();
@@ -117,7 +116,7 @@ class SentryPlugin extends plugin_base_1.PluginBase {
             release: `${this.parentPackage.name}@${this.parentPackage.version}`,
             dsn: pluginConfig.dsn,
             integrations: [
-                new SentryIntegrations.Dedupe(),
+                this.Sentry.dedupeIntegration(),
                 this.Sentry.httpIntegration({
                     trackIncomingRequestsAsSessions: false, // default: true
                 }),
