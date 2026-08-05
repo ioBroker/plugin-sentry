@@ -162,7 +162,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
-### **WORK IN PROGRESS**
+### 3.2.0 (2026-08-05)
 - (@GermanBluefox) Removed the legacy `@sentry/integrations` dependency and use `dedupeIntegration` from `@sentry/node` instead
 - (@GermanBluefox) Fixed an `ExperimentalWarning` about `localStorage` written to stderr on Node.js 26, caused by the transitive `localforage` dependency
 
