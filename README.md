@@ -166,6 +166,10 @@ This should cause the adapter to crash and the exception to be shown in the sent
 - (@GermanBluefox) Removed the legacy `@sentry/integrations` dependency and use `dedupeIntegration` from `@sentry/node` instead
 - (@GermanBluefox) Fixed an `ExperimentalWarning` about `localStorage` written to stderr on Node.js 26, caused by the transitive `localforage` dependency
 
+### 3.1.3 (2026-08-05)
+- (@GermanBluefox) Removed the legacy `@sentry/integrations` dependency and use `dedupeIntegration` from `@sentry/node` instead
+- (@GermanBluefox) Fixed an `ExperimentalWarning` about `localStorage` written to stderr on Node.js 26, caused by the transitive `localforage` dependency
+
 ### 3.1.2 (2026-06-16)
 - (@Apollon77) Fixed Sentry session reporting disabling
 
