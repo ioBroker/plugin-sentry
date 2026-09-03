@@ -40,7 +40,7 @@
     },
     "homepage": "https://github.com/ioBroker/plugin-sentry#readme",
     "dependencies": {
-        "@iobroker/plugin-base": "^3.0.3",
+        "@iobroker/plugin-base": "^4.0.0",
         "@sentry/node": "^10.69.0",
         "source-map-support": "^0.5.21"
     },
