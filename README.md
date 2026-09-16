@@ -162,7 +162,7 @@ This should cause the adapter to crash and the exception to be shown in the sent
 -->
 
 ## Changelog
-### 3.1.4 (2026-09-16)
+### **WORK IN PROGRESS**
 - (@GermanBluefox) Added the OpenTelemetry packages as direct dependencies, as `@sentry/node-core` declares them only as optional peer dependencies and npm does not necessarily install them
 - (@GermanBluefox) The plugin now only disables the error reporting with a warning instead of crashing the adapter if `@sentry/node` or one of its dependencies cannot be resolved because of an incomplete npm installation
 
