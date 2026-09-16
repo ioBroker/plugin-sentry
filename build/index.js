@@ -87,13 +87,49 @@ class SentryPlugin extends plugin_base_1.PluginBase {
         const uuid = uuidObj?.native?.uuid || null;
         await this._registerSentry(pluginConfig, uuid);
     }
+    /**
+     * Load the Sentry module.
+     *
+     * All ioBroker adapters share one flat `node_modules` directory. If npm ends up with an incomplete or conflicting
+     * tree, `@sentry/node` or one of its OpenTelemetry dependencies cannot be resolved. `@sentry/node-core` declares
+     * them as optional peer dependencies, so npm does not necessarily place them next to it. In this case only the
+     * error reporting is switched off instead of reporting a cryptic module resolution error.
+     *
+     * @returns the Sentry module or null if it is not installed completely
+     */
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    async _loadSentry() {
+        try {
+            return await import('@sentry/node');
+        }
+        catch (e) {
+            const error = e;
+            if (error?.code !== 'ERR_MODULE_NOT_FOUND' && error?.code !== 'MODULE_NOT_FOUND') {
+                throw e;
+            }
+            const missing = /Cannot find (?:package|module) '([^']+)'/.exec(error.message || '')?.[1];
+            this.log.warn(`Sentry Plugin cannot be loaded because ${missing ? `the package "${missing}" is` : 'one of its dependencies is'} not installed. ` +
+                `This is an incomplete npm installation and does not influence the functionality of ${this.parentPackage?.name || 'the adapter'}. ` +
+                `To repair it, execute "npm install" in the ioBroker directory (normally /opt/iobroker).`);
+            return null;
+        }
+    }
     async _registerSentry(pluginConfig, uuid) {
-        this.reallyEnabled = true;
         // Require necessary tooling
-        this.Sentry = await import('@sentry/node');
+        const sentry = await this._loadSentry();
+        if (!sentry) {
+            throw new Error('Sentry Plugin disabled because it is not installed completely');
+        }
+        this.Sentry = sentry;
+        this.reallyEnabled = true;
         // By installing source map support, we get the original source
         // locations in error messages
-        require('source-map-support').install();
+        try {
+            require('source-map-support').install();
+        }
+        catch {
+            // ignore: without it we only lose the original source locations in the stack traces
+        }
         let sentryPathWhitelist = [];
         if (pluginConfig.pathWhitelist && Array.isArray(pluginConfig.pathWhitelist)) {
             sentryPathWhitelist = pluginConfig.pathWhitelist;
