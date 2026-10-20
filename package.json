@@ -42,7 +42,7 @@
   "dependencies": {
     "@iobroker/plugin-base": "^3.0.3",
     "@opentelemetry/api": "^1.9.1",
-    "@opentelemetry/core": "^1.30.1 || ^2.1.0",
+    "@opentelemetry/core": "^2.11.0",
     "@opentelemetry/instrumentation": ">=0.57.1 <1",
     "@opentelemetry/sdk-trace-base": "^1.30.1 || ^2.1.0",
     "@sentry/node": "^10.74.0",
